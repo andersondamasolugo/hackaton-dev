@@ -17,23 +17,21 @@ import java.util.Map;
 
 /**
  * Controller de prueba para verificar conexión directa a Oracle.
- * Solo disponible con profile "real".
- * Ejecuta queries SELECT directos para validar acceso a datos.
+ * Filtra por NIT_NEGOCIO = 72 (Ramo Rentas Voluntarias).
  */
 @RestController
 @RequestMapping("/db-test")
 @Profile("real")
-@Tag(name = "DB Test", description = "Endpoints de prueba de conexión a Oracle (solo profile real)")
+@Tag(name = "DB Test", description = "Endpoints de prueba — Ramo 72 (RVT)")
 public class DbTestController {
+
+    private static final int RAMO_RVT = 72;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    /**
-     * Verifica la conexión a Oracle con un SELECT simple.
-     */
     @GetMapping("/ping")
-    @Operation(summary = "Ping DB", description = "Verifica conexión a Oracle con SELECT 1 FROM DUAL")
+    @Operation(summary = "Ping DB")
     public ResponseEntity<Map<String, Object>> ping() {
         Map<String, Object> result = new LinkedHashMap<>();
         try {
@@ -41,7 +39,7 @@ public class DbTestController {
                 "SELECT banner FROM v$version WHERE ROWNUM = 1", String.class);
             result.put("status", "CONECTADO");
             result.put("database", dbVersion);
-            result.put("schema", "rvt");
+            result.put("ramo", RAMO_RVT);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             result.put("status", "ERROR");
@@ -50,25 +48,20 @@ public class DbTestController {
         }
     }
 
-    /**
-     * Lista las primeras 10 pólizas de la tabla POLIZA.
-     */
     @GetMapping("/polizas")
-    @Operation(summary = "Listar pólizas Oracle", description = "SELECT de las primeras 10 pólizas de la tabla POLIZA")
+    @Operation(summary = "Listar pólizas Ramo 72")
     public ResponseEntity<List<Map<String, Object>>> listarPolizas() {
         List<Map<String, Object>> polizas = jdbcTemplate.queryForList(
             "SELECT NUMERO_INTERNO, NUMERO_POLIZA, ESTADO_POLIZA, " +
             "IDENTIFICACION_AFILIADO, VALOR_PRIMA_UNICA, VALOR_BASICO_RENTA, " +
             "FECHA_EXPEDICION, MODALIDAD_PENSION, CLASE_POLIZA, TIPO_RENTA " +
-            "FROM POLIZA WHERE ROWNUM <= 10 ORDER BY NUMERO_INTERNO");
+            "FROM POLIZA WHERE NIT_NEGOCIO = ? AND ROWNUM <= 10 ORDER BY NUMERO_INTERNO",
+            RAMO_RVT);
         return ResponseEntity.ok(polizas);
     }
 
-    /**
-     * Consulta una póliza por número interno.
-     */
     @GetMapping("/polizas/{numeroInterno}")
-    @Operation(summary = "Consultar póliza por número interno")
+    @Operation(summary = "Consultar póliza Ramo 72 por número interno")
     public ResponseEntity<Map<String, Object>> consultarPoliza(@PathVariable int numeroInterno) {
         try {
             Map<String, Object> poliza = jdbcTemplate.queryForMap(
@@ -77,33 +70,28 @@ public class DbTestController {
                 "VALOR_MESADA, FECHA_EXPEDICION, FECHA_VIGENCIA, " +
                 "MODALIDAD_PENSION, CLASE_POLIZA, TIPO_RENTA, CAUSA_RENTA, " +
                 "NUMERO_BENEFICIARIOS, OBSERVACIONES " +
-                "FROM POLIZA WHERE NUMERO_INTERNO = ?", numeroInterno);
+                "FROM POLIZA WHERE NIT_NEGOCIO = ? AND NUMERO_INTERNO = ?",
+                RAMO_RVT, numeroInterno);
             return ResponseEntity.ok(poliza);
         } catch (Exception e) {
             return ResponseEntity.notFound().build();
         }
     }
 
-    /**
-     * Lista beneficiarios de una póliza por número interno.
-     */
     @GetMapping("/beneficiarios/{numeroInterno}")
-    @Operation(summary = "Listar beneficiarios por número interno de póliza")
+    @Operation(summary = "Listar beneficiarios Ramo 72")
     public ResponseEntity<List<Map<String, Object>>> listarBeneficiarios(@PathVariable int numeroInterno) {
         List<Map<String, Object>> beneficiarios = jdbcTemplate.queryForList(
             "SELECT SECUENCIA_BENEFICIARIO, TIPO_DOCUMENTO, IDENTIFICACION_BENEFICIARIO, " +
             "NOMBRE_COMUN, PARENTESCO, PORCENTAJE_BENEFICIARIO, ESTADO_BENEFICIARIO, " +
             "SEXO, FECHA_NACIMIENTO " +
-            "FROM BENEFICIARIO WHERE NUMERO_INTERNO = ? AND SENAL_ACTIVO = 'S'",
-            numeroInterno);
+            "FROM BENEFICIARIO WHERE NIT_NEGOCIO = ? AND NUMERO_INTERNO = ? AND SENAL_ACTIVO = 'S'",
+            RAMO_RVT, numeroInterno);
         return ResponseEntity.ok(beneficiarios);
     }
 
-    /**
-     * Lista los primeros 10 clientes.
-     */
     @GetMapping("/clientes")
-    @Operation(summary = "Listar clientes Oracle", description = "SELECT de los primeros 10 clientes")
+    @Operation(summary = "Listar clientes Oracle")
     public ResponseEntity<List<Map<String, Object>>> listarClientes() {
         List<Map<String, Object>> clientes = jdbcTemplate.queryForList(
             "SELECT NIT, TIPO_PERSONA, TIPO_DOCUMENTO, IDENTIFICACION_FISCAL, " +
@@ -112,18 +100,18 @@ public class DbTestController {
         return ResponseEntity.ok(clientes);
     }
 
-    /**
-     * Cuenta registros en las tablas principales.
-     */
     @GetMapping("/stats")
-    @Operation(summary = "Estadísticas de tablas", description = "Cuenta registros en tablas principales")
+    @Operation(summary = "Stats Ramo 72")
     public ResponseEntity<Map<String, Object>> stats() {
         Map<String, Object> stats = new LinkedHashMap<>();
         try {
-            stats.put("polizas", jdbcTemplate.queryForObject("SELECT COUNT(*) FROM POLIZA", Integer.class));
-            stats.put("beneficiarios", jdbcTemplate.queryForObject("SELECT COUNT(*) FROM BENEFICIARIO", Integer.class));
-            stats.put("clientes", jdbcTemplate.queryForObject("SELECT COUNT(*) FROM CLIENTES", Integer.class));
-            stats.put("parametro_poliza", jdbcTemplate.queryForObject("SELECT COUNT(*) FROM PARAMETRO_POLIZA", Integer.class));
+            stats.put("polizas_ramo72", jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM POLIZA WHERE NIT_NEGOCIO = ?", Integer.class, RAMO_RVT));
+            stats.put("beneficiarios_ramo72", jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM BENEFICIARIO WHERE NIT_NEGOCIO = ?", Integer.class, RAMO_RVT));
+            stats.put("clientes_total", jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM CLIENTES", Integer.class));
+            stats.put("ramo", RAMO_RVT);
             stats.put("status", "OK");
             return ResponseEntity.ok(stats);
         } catch (Exception e) {

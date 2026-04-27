@@ -1,22 +1,22 @@
 package com.segurosbolivar.rvt.infrastructure.adapter.out.persistence;
 
-import java.util.List;
-import java.util.Optional;
-
+import com.segurosbolivar.rvt.domain.model.Beneficiario;
+import com.segurosbolivar.rvt.domain.port.out.BeneficiarioRepository;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
-import com.segurosbolivar.rvt.domain.model.Beneficiario;
-import com.segurosbolivar.rvt.domain.port.out.BeneficiarioRepository;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Implementación JPA del repositorio de beneficiarios contra Oracle.
- * Busca por NUMERO_INTERNO (el parámetro "numeroPoliza" se interpreta como número interno).
+ * Filtra por NIT_NEGOCIO = 72 (Ramo Rentas Voluntarias).
  */
 @Repository
 @Profile("real")
 public class JpaBeneficiarioAdapter implements BeneficiarioRepository {
 
+    private static final long RAMO_RVT = 72L;
     private final BeneficiarioJpaJpaRepository jpaRepository;
 
     public JpaBeneficiarioAdapter(BeneficiarioJpaJpaRepository jpaRepository) {
@@ -27,7 +27,7 @@ public class JpaBeneficiarioAdapter implements BeneficiarioRepository {
     public List<Beneficiario> findByNumeroPoliza(String numeroPoliza) {
         try {
             int numeroInterno = Integer.parseInt(numeroPoliza);
-            return jpaRepository.findByNumeroInternoAndSenalActivo(numeroInterno, "S").stream()
+            return jpaRepository.findByNitNegocioAndNumeroInternoAndSenalActivo(RAMO_RVT, numeroInterno, "S").stream()
                     .map(BeneficiarioJpaEntity::toDomain)
                     .toList();
         } catch (NumberFormatException e) {
@@ -37,16 +37,11 @@ public class JpaBeneficiarioAdapter implements BeneficiarioRepository {
 
     @Override
     public Optional<Beneficiario> findById(Long id) {
-        // En Oracle, el ID es la secuencia_beneficiario — búsqueda simplificada
-        return jpaRepository.findAll().stream()
-                .filter(e -> e.getSecuenciaBeneficiario() != null && e.getSecuenciaBeneficiario().longValue() == id)
-                .findFirst()
-                .map(BeneficiarioJpaEntity::toDomain);
+        return Optional.empty();
     }
 
     @Override
     public Beneficiario save(Beneficiario beneficiario) {
-        // Read-only para Oracle legado en el demo
         return beneficiario;
     }
 }

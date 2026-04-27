@@ -9,13 +9,13 @@ import java.util.Optional;
 
 /**
  * Implementación JPA del repositorio de pólizas contra Oracle.
- * Busca por NUMERO_POLIZA o NUMERO_INTERNO (flexible para el demo).
- * Activa solo con el profile "real" para conexión a Oracle.
+ * Filtra por NIT_NEGOCIO = 72 (Ramo Rentas Voluntarias).
  */
 @Repository
 @Profile("real")
 public class JpaPolizaRepository implements PolizaRepository {
 
+    private static final long RAMO_RVT = 72L;
     private final JpaPolizaJpaRepository jpaRepository;
 
     public JpaPolizaRepository(JpaPolizaJpaRepository jpaRepository) {
@@ -29,22 +29,15 @@ public class JpaPolizaRepository implements PolizaRepository {
         return saved.toDomain();
     }
 
-    /**
-     * Busca una póliza por número. Intenta primero por NUMERO_POLIZA (texto),
-     * luego por NUMERO_INTERNO (numérico) si el valor es un número.
-     */
     @Override
     public Optional<Poliza> findByNumeroPoliza(String numeroPoliza) {
-        // Primero intenta por NUMERO_POLIZA (texto)
-        Optional<JpaPolizaEntity> result = jpaRepository.findByNumeroPoliza(numeroPoliza);
+        Optional<JpaPolizaEntity> result = jpaRepository.findByNumeroPolizaAndNitNegocio(numeroPoliza, RAMO_RVT);
 
-        // Si no encuentra y el valor es numérico, intenta por NUMERO_INTERNO
         if (result.isEmpty()) {
             try {
                 int numeroInterno = Integer.parseInt(numeroPoliza);
-                result = jpaRepository.findByNumeroInterno(numeroInterno);
+                result = jpaRepository.findByNumeroInternoAndNitNegocio(numeroInterno, RAMO_RVT);
             } catch (NumberFormatException ignored) {
-                // No es numérico, no buscar por NUMERO_INTERNO
             }
         }
 

@@ -11,12 +11,70 @@
 <body>
   <app-root></app-root>
 
-  <!-- n8n Chat Widget -->
+  <!-- n8n Chat Widget — Asistente RVT -->
   <link href="https://cdn.jsdelivr.net/npm/@n8n/chat/dist/style.css" rel="stylesheet" />
+  <style>
+    :root {
+      --chat--color--primary: #00a651;
+      --chat--color--primary-shade-50: #009648;
+      --chat--color--primary--shade-100: #00863f;
+      --chat--color--secondary: #003b71;
+      --chat--color-secondary-shade-50: #002f5a;
+      --chat--color-white: #fff;
+      --chat--color-light: #e8f5e9;
+      --chat--color-light-shade-50: #c8e6c9;
+      --chat--color-light-shade-100: #a5d6a7;
+      --chat--color-medium: #81c784;
+      --chat--color-dark: #003b71;
+      --chat--color-disabled: #a5d6a7;
+      --chat--color-typing: #2e7d32;
+      --chat--spacing: 1rem;
+      --chat--border-radius: 0.5rem;
+      --chat--font-family: 'Segoe UI', Roboto, sans-serif;
+      --chat--window--width: 420px;
+      --chat--window--height: 620px;
+      --chat--window--border: none;
+      --chat--window--border-radius: 1rem;
+      --chat--header--background: #00a651;
+      --chat--header--color: #fff;
+      --chat--heading--font-size: 1.4em;
+      --chat--message--border-radius: 1rem;
+      --chat--message--bot--background: #fff;
+      --chat--message--bot--color: #1a1a2e;
+      --chat--message--bot--border: 1px solid #c8e6c9;
+      --chat--message--user--background: #003b71;
+      --chat--message--user--color: #fff;
+      --chat--message--user--border: none;
+      --chat--toggle--background: #00a651;
+      --chat--toggle--hover--background: #009648;
+      --chat--toggle--active--background: #00863f;
+      --chat--toggle--color: #fff;
+      --chat--input--send--button--color: #00a651;
+      --chat--input--send--button--background: transparent;
+      --chat--body--background: #e8f5e9;
+      --chat--footer--background: #fff;
+      --chat--button--background--primary: #00a651;
+      --chat--button--color--primary: #fff;
+      --chat--button--border-radius: 2rem;
+    }
+    .chat-message { max-width: 85%; }
+  </style>
   <script type="module">
     import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js';
     createChat({
-      webhookUrl: 'http://10.111.16.78:5678/webhook/0f4c9122-0b30-4ee5-9e0a-b6d6ee6f6a5d/chat'
+      webhookUrl: 'http://10.111.16.78:5678/webhook/4b5f785c-c478-43f5-a021-26acd6d04b08/chat',
+      i18n: {
+        en: {
+          title: 'Asistente RVT',
+          subtitle: 'Seguros Bolívar',
+          inputPlaceholder: 'Escribe tu consulta...',
+          getStarted: 'Nueva conversación',
+        },
+      },
+      initialMessages: [
+        'Hola! 👋 Soy el asistente de operaciones RVT.',
+        '¿En qué te puedo ayudar?'
+      ],
     });
   </script>
 </body>
