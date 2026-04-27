@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -8,9 +8,7 @@ import { ParametroResponse } from '../../../shared/models';
 
 /**
  * Componente de edición de parámetros del ramo.
- * Formulario reactivo para actualizar valor y descripción de un parámetro.
- * Muestra información de rango como referencia de solo lectura.
- * Maneja errores de validación de rango (400) del backend.
+ * Usa signals para detección de cambios confiable.
  */
 @Component({
   selector: 'app-parametrizacion-editar',
@@ -24,29 +22,17 @@ export class ParametrizacionEditarComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
 
-  /** Identificador del parámetro obtenido de la ruta. */
   parametroId = 0;
+  parametro = signal<ParametroResponse | null>(null);
+  isLoadingData = signal(false);
+  isLoading = signal(false);
+  successMessage = signal('');
+  errorMessage = signal('');
 
-  /** Datos del parámetro cargado para mostrar info de referencia. */
-  parametro: ParametroResponse | null = null;
-
-  /** Formulario reactivo de edición. */
   editarForm = this.fb.nonNullable.group({
     valor: ['', Validators.required],
     descripcion: [''],
   });
-
-  /** Indica si se está cargando el parámetro. */
-  isLoadingData = false;
-
-  /** Indica si hay una petición de guardado en curso. */
-  isLoading = false;
-
-  /** Mensaje de éxito mostrado al usuario. */
-  successMessage = '';
-
-  /** Mensaje de error mostrado al usuario. */
-  errorMessage = '';
 
   ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('id');
@@ -54,42 +40,37 @@ export class ParametrizacionEditarComponent implements OnInit {
     this.loadParametro();
   }
 
-  /**
-   * Carga los datos del parámetro para pre-llenar el formulario
-   * y mostrar la información de rango como referencia.
-   */
   private loadParametro(): void {
-    this.isLoadingData = true;
+    this.isLoadingData.set(true);
 
     this.parametroService.listar().subscribe({
       next: (parametros) => {
-        this.parametro =
-          parametros.find((p) => p.parametroId === this.parametroId) ?? null;
-        if (this.parametro) {
+        const found = parametros.find(p => p.parametroId === this.parametroId) ?? null;
+        this.parametro.set(found);
+        if (found) {
           this.editarForm.patchValue({
-            valor: this.parametro.valor,
-            descripcion: this.parametro.descripcion,
+            valor: found.valor,
+            descripcion: found.descripcion,
           });
         }
-        this.isLoadingData = false;
+        this.isLoadingData.set(false);
       },
       error: () => {
-        this.isLoadingData = false;
-        this.errorMessage = 'Error al cargar datos del parámetro.';
+        this.isLoadingData.set(false);
+        this.errorMessage.set('Error al cargar datos del parámetro.');
       },
     });
   }
 
-  /** Envía el formulario de actualización al backend. */
   onSubmit(): void {
     if (this.editarForm.invalid) {
       this.editarForm.markAllAsTouched();
       return;
     }
 
-    this.isLoading = true;
-    this.successMessage = '';
-    this.errorMessage = '';
+    this.isLoading.set(true);
+    this.successMessage.set('');
+    this.errorMessage.set('');
 
     const formValue = this.editarForm.getRawValue();
 
@@ -100,27 +81,23 @@ export class ParametrizacionEditarComponent implements OnInit {
       })
       .subscribe({
         next: (updated) => {
-          this.parametro = updated;
-          this.successMessage = 'Parámetro actualizado exitosamente';
-          this.isLoading = false;
+          this.parametro.set(updated);
+          this.successMessage.set('Parámetro actualizado exitosamente');
+          this.isLoading.set(false);
         },
         error: (err: HttpErrorResponse) => {
-          this.isLoading = false;
+          this.isLoading.set(false);
           if (err.status === 400) {
-            const body = err.error;
-            this.errorMessage =
-              body?.message ?? 'Valor fuera de rango permitido';
+            this.errorMessage.set(err.error?.message ?? 'Valor fuera de rango permitido');
           } else if (err.status === 404) {
-            this.errorMessage = 'Parámetro no encontrado';
+            this.errorMessage.set('Parámetro no encontrado');
           } else {
-            this.errorMessage =
-              'Error al actualizar el parámetro. Intente nuevamente.';
+            this.errorMessage.set('Error al actualizar. Intente nuevamente.');
           }
         },
       });
   }
 
-  /** Navega de vuelta a la lista de parámetros. */
   goBack(): void {
     this.router.navigate(['/parametrizacion']);
   }
