@@ -5,62 +5,38 @@
     <div class="form-group">
       <label for="numeroPoliza">Número de Póliza</label>
       <input id="numeroPoliza" type="text" [(ngModel)]="numeroPoliza"
-             placeholder="Ej: RVT-a1b2c3d4" (keyup.enter)="onSearch()" />
+             placeholder="Ej: 10, 10370" (keyup.enter)="onSearch()" />
     </div>
-    <button class="btn-primary" (click)="onSearch()" [disabled]="isSearching || !numeroPoliza.trim()">
-      {{ isSearching ? 'Buscando...' : 'Buscar' }}
+    <button class="btn-primary" (click)="onSearch()" [disabled]="isSearching() || !numeroPoliza.trim()">
+      {{ isSearching() ? 'Buscando...' : 'Buscar' }}
     </button>
   </div>
 
-  @if (poliza) {
-    <div class="poliza-detail">
-      <h3>Datos de la Póliza</h3>
-      <div class="detail-grid">
-        <div class="detail-item">
-          <span class="label">Número</span>
-          <span class="value">{{ poliza.numeroPoliza }}</span>
-        </div>
-        <div class="detail-item">
-          <span class="label">Estado</span>
-          <span class="value">
-            <span class="badge" [class.badge-pendiente]="poliza.estado === 'PENDIENTE'"
-                  [class.badge-activa]="poliza.estado === 'ACTIVA'">
-              {{ poliza.estado }}
-            </span>
-          </span>
-        </div>
-        <div class="detail-item">
-          <span class="label">Nombre Tomador</span>
-          <span class="value">{{ poliza.nombreTomador }}</span>
-        </div>
-        <div class="detail-item">
-          <span class="label">Monto Renta</span>
-          <span class="value">{{ poliza.montoRenta | number:'1.2-2' }}</span>
-        </div>
-      </div>
-      @if (poliza.estado === 'PENDIENTE') {
-        <div class="activate-actions">
-          <button class="btn-success" (click)="onActivar()" [disabled]="isActivating">
-            {{ isActivating ? 'Activando...' : 'Activar Póliza' }}
-          </button>
-        </div>
-      }
+  @if (poliza(); as p) {
+    <div class="table-container" style="margin-top: 1.5rem;">
+      <table>
+        <thead><tr><th colspan="2" style="text-align:center;">📋 Datos de la Póliza</th></tr></thead>
+        <tbody>
+          <tr><td style="font-weight:600;color:var(--sb-primary);width:40%;">Número</td><td>{{ p.numeroPoliza }}</td></tr>
+          <tr><td style="font-weight:600;color:var(--sb-primary);">Estado</td><td><span class="badge" [class.badge-pendiente]="p.estado==='PENDIENTE'" [class.badge-activa]="p.estado==='ACTIVA'">{{ p.estado }}</span></td></tr>
+          <tr><td style="font-weight:600;color:var(--sb-primary);">Tomador</td><td>{{ p.nombreTomador }}</td></tr>
+          <tr><td style="font-weight:600;color:var(--sb-primary);">Monto Renta</td><td>$ {{ p.montoRenta }}</td></tr>
+        </tbody>
+      </table>
     </div>
+
+    @if (p.estado === 'PENDIENTE') {
+      <div class="actions" style="margin-top:1rem;">
+        <button class="btn-success" (click)="onActivar()" [disabled]="isActivating()">
+          {{ isActivating() ? 'Activando...' : 'Activar Póliza' }}
+        </button>
+      </div>
+    }
   }
 
-  @if (successMessage) {
-    <div class="alert alert-success">{{ successMessage }}</div>
-  }
+  @if (successMessage(); as msg) { <div class="alert alert-success">{{ msg }}</div> }
+  @if (notFoundMessage(); as msg) { <div class="alert alert-warning">{{ msg }}</div> }
+  @if (errorMessage(); as msg) { <div class="alert alert-error">{{ msg }}</div> }
 
-  @if (notFoundMessage) {
-    <div class="alert alert-warning">{{ notFoundMessage }}</div>
-  }
-
-  @if (errorMessage) {
-    <div class="alert alert-error">{{ errorMessage }}</div>
-  }
-
-  <div class="actions">
-    <button class="btn-secondary" (click)="goToMenu()">Volver al Menú</button>
-  </div>
+  <div class="actions"><button class="btn-secondary" (click)="goToMenu()">Volver al Menú</button></div>
 </div>

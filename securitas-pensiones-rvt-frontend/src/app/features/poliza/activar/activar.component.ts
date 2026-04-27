@@ -1,108 +1,66 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { CommonModule, DecimalPipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 
 import { PolizaService } from '../poliza.service';
 import { PolizaResponse } from '../../../shared/models';
 
-/**
- * Componente de activación de pólizas.
- * Permite buscar una póliza por número, ver sus datos
- * y activarla si está en estado PENDIENTE.
- */
 @Component({
   selector: 'app-activar',
   templateUrl: './activar.component.html',
   styleUrl: './activar.component.css',
-  imports: [FormsModule, CommonModule, DecimalPipe],
+  imports: [FormsModule],
 })
 export class ActivarComponent {
   private readonly polizaService = inject(PolizaService);
   private readonly router = inject(Router);
 
-  /** Número de póliza ingresado por el usuario. */
   numeroPoliza = '';
+  poliza = signal<PolizaResponse | null>(null);
+  isSearching = signal(false);
+  isActivating = signal(false);
+  successMessage = signal('');
+  notFoundMessage = signal('');
+  errorMessage = signal('');
 
-  /** Póliza encontrada tras la búsqueda. */
-  poliza: PolizaResponse | null = null;
-
-  /** Indica si hay una búsqueda en curso. */
-  isSearching = false;
-
-  /** Indica si hay una activación en curso. */
-  isActivating = false;
-
-  /** Mensaje de éxito tras activación. */
-  successMessage = '';
-
-  /** Mensaje cuando la póliza no se encuentra. */
-  notFoundMessage = '';
-
-  /** Mensaje de error genérico o de conflicto. */
-  errorMessage = '';
-
-  /** Busca la póliza por el número ingresado. */
   onSearch(): void {
     const trimmed = this.numeroPoliza.trim();
-    if (!trimmed) {
-      return;
-    }
+    if (!trimmed) return;
 
-    this.isSearching = true;
-    this.poliza = null;
-    this.successMessage = '';
-    this.notFoundMessage = '';
-    this.errorMessage = '';
+    this.isSearching.set(true);
+    this.poliza.set(null);
+    this.successMessage.set('');
+    this.notFoundMessage.set('');
+    this.errorMessage.set('');
 
     this.polizaService.consultar(trimmed).subscribe({
-      next: (response) => {
-        this.poliza = response;
-        this.isSearching = false;
-      },
+      next: (response) => { this.poliza.set(response); this.isSearching.set(false); },
       error: (err: HttpErrorResponse) => {
-        this.isSearching = false;
-        if (err.status === 404) {
-          this.notFoundMessage = 'Póliza no encontrada';
-        } else {
-          this.errorMessage = 'Error al consultar la póliza. Intente nuevamente.';
-        }
+        this.isSearching.set(false);
+        if (err.status === 404) this.notFoundMessage.set('Póliza no encontrada');
+        else this.errorMessage.set('Error al consultar la póliza.');
       },
     });
   }
 
-  /** Activa la póliza encontrada. */
   onActivar(): void {
-    if (!this.poliza) {
-      return;
-    }
+    const p = this.poliza();
+    if (!p) return;
 
-    this.isActivating = true;
-    this.successMessage = '';
-    this.errorMessage = '';
+    this.isActivating.set(true);
+    this.successMessage.set('');
+    this.errorMessage.set('');
 
-    this.polizaService.activar(this.poliza.numeroPoliza).subscribe({
-      next: (response) => {
-        this.poliza = response;
-        this.successMessage = 'Póliza activada exitosamente';
-        this.isActivating = false;
-      },
+    this.polizaService.activar(p.numeroPoliza).subscribe({
+      next: (response) => { this.poliza.set(response); this.successMessage.set('Póliza activada exitosamente'); this.isActivating.set(false); },
       error: (err: HttpErrorResponse) => {
-        this.isActivating = false;
-        if (err.status === 409) {
-          this.errorMessage = 'La póliza no puede ser activada porque no está en estado pendiente';
-        } else if (err.status === 404) {
-          this.errorMessage = 'Póliza no encontrada';
-        } else {
-          this.errorMessage = 'Error al activar la póliza. Intente nuevamente.';
-        }
+        this.isActivating.set(false);
+        if (err.status === 409) this.errorMessage.set('La póliza no puede ser activada (no está en estado pendiente)');
+        else this.errorMessage.set('Error al activar la póliza.');
       },
     });
   }
 
-  /** Navega de vuelta al menú principal. */
-  goToMenu(): void {
-    this.router.navigate(['/menu']);
-  }
+  goToMenu(): void { this.router.navigate(['/menu']); }
 }

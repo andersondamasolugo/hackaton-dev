@@ -1,15 +1,10 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 
 import { PolizaService } from '../poliza.service';
 import { PolizaResponse } from '../../../shared/models';
 
-/**
- * Componente de expedición de pólizas.
- * Formulario reactivo con validaciones por campo.
- * Muestra número de póliza generado en caso de éxito.
- */
 @Component({
   selector: 'app-expedir',
   templateUrl: './expedir.component.html',
@@ -21,7 +16,6 @@ export class ExpedirComponent {
   private readonly polizaService = inject(PolizaService);
   private readonly router = inject(Router);
 
-  /** Formulario reactivo de expedición. */
   expedirForm = this.fb.nonNullable.group({
     tipoIdentificacion: ['', Validators.required],
     numeroIdentificacion: ['', Validators.required],
@@ -30,55 +24,38 @@ export class ExpedirComponent {
     montoRenta: [0, [Validators.required, Validators.min(1)]],
   });
 
-  /** Indica si hay una petición en curso. */
-  isLoading = false;
+  isLoading = signal(false);
+  successMessage = signal('');
+  errorMessage = signal('');
+  createdPoliza = signal<PolizaResponse | null>(null);
 
-  /** Mensaje de éxito mostrado al usuario. */
-  successMessage = '';
-
-  /** Mensaje de error mostrado al usuario. */
-  errorMessage = '';
-
-  /** Póliza creada tras expedición exitosa. */
-  createdPoliza: PolizaResponse | null = null;
-
-  /** Envía el formulario de expedición al backend. */
   onSubmit(): void {
-    if (this.expedirForm.invalid) {
-      this.expedirForm.markAllAsTouched();
-      return;
-    }
+    if (this.expedirForm.invalid) { this.expedirForm.markAllAsTouched(); return; }
 
-    this.isLoading = true;
-    this.successMessage = '';
-    this.errorMessage = '';
+    this.isLoading.set(true);
+    this.successMessage.set('');
+    this.errorMessage.set('');
 
-    const formValue = this.expedirForm.getRawValue();
-
-    this.polizaService
-      .expedir({
-        tipoIdentificacion: formValue.tipoIdentificacion,
-        numeroIdentificacion: formValue.numeroIdentificacion,
-        nombreTomador: formValue.nombreTomador,
-        fechaInicioVigencia: formValue.fechaInicioVigencia,
-        montoRenta: formValue.montoRenta,
-      })
-      .subscribe({
-        next: (poliza) => {
-          this.createdPoliza = poliza;
-          this.successMessage = 'Póliza expedida exitosamente';
-          this.isLoading = false;
-          this.expedirForm.reset();
-        },
-        error: () => {
-          this.errorMessage = 'Error al expedir la póliza. Verifique los datos e intente nuevamente.';
-          this.isLoading = false;
-        },
-      });
+    const v = this.expedirForm.getRawValue();
+    this.polizaService.expedir({
+      tipoIdentificacion: v.tipoIdentificacion,
+      numeroIdentificacion: v.numeroIdentificacion,
+      nombreTomador: v.nombreTomador,
+      fechaInicioVigencia: v.fechaInicioVigencia,
+      montoRenta: v.montoRenta,
+    }).subscribe({
+      next: (poliza) => {
+        this.createdPoliza.set(poliza);
+        this.successMessage.set('Póliza expedida exitosamente');
+        this.isLoading.set(false);
+        this.expedirForm.reset();
+      },
+      error: () => {
+        this.errorMessage.set('Error al expedir la póliza. Verifique los datos.');
+        this.isLoading.set(false);
+      },
+    });
   }
 
-  /** Navega de vuelta al menú principal. */
-  goToMenu(): void {
-    this.router.navigate(['/menu']);
-  }
+  goToMenu(): void { this.router.navigate(['/menu']); }
 }
