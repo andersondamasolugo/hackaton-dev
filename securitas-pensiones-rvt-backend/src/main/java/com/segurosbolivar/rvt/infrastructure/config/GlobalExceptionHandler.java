@@ -4,6 +4,7 @@ import com.segurosbolivar.rvt.domain.exception.BeneficiarioNotFoundException;
 import com.segurosbolivar.rvt.domain.exception.ClienteNotFoundException;
 import com.segurosbolivar.rvt.domain.exception.CredencialesInvalidasException;
 import com.segurosbolivar.rvt.domain.exception.FiltroRequeridoException;
+import com.segurosbolivar.rvt.domain.exception.ParametroNotFoundException;
 import com.segurosbolivar.rvt.domain.exception.PolizaNoActivableException;
 import com.segurosbolivar.rvt.domain.exception.PolizaNotFoundException;
 import com.segurosbolivar.rvt.domain.exception.PorcentajeExcedidoException;
@@ -47,7 +48,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({
         PolizaNotFoundException.class,
         BeneficiarioNotFoundException.class,
-        ClienteNotFoundException.class
+        ClienteNotFoundException.class,
+        ParametroNotFoundException.class
     })
     public ResponseEntity<ErrorResponse> handleNotFound(RvtDomainException ex) {
         return buildResponse(HttpStatus.NOT_FOUND, ex.getUserMessage());

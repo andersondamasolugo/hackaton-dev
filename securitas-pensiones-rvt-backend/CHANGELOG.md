@@ -46,6 +46,14 @@ y este proyecto adhiere a [Versionamiento Semántico](https://semver.org/lang/es
 - Se creó `ClienteJpaEntity` en `infrastructure/adapter/out/persistence/` con mapeo JPA a tabla CLIENTE y métodos `fromDomain`/`toDomain`
 - Se creó `ClienteJpaJpaRepository` (Spring Data JPA) con consultas derivadas por tipo identificación, número identificación y nombre (contains ignore case)
 - Se creó `JpaClienteAdapter` en `infrastructure/adapter/out/persistence/` con `@Profile("real")` que adapta entre dominio y JPA con filtrado por criterios
+- Se creó `ParametroNotFoundException` en `domain/exception/` para manejo de parámetro no encontrado (404)
+- Se implementó `ParametroUseCase` en `application/usecase/` con métodos `listar` (retorna todos los parámetros) y `actualizar` (valida rango con `Parametro.validarRango()`, actualiza valor y descripción)
+- Se creó `ParametroController` en `infrastructure/adapter/in/rest/` con endpoints `GET /parametros` (200) y `PUT /parametros/{parametroId}` (200) con anotaciones Swagger y @Valid
+- Se creó `MockParametroRepository` en `infrastructure/adapter/out/mock/` con `@Profile("mock")` y pre-carga de 5 parámetros del ramo RV: TASA_BASE, MONTO_MIN, MONTO_MAX, PLAZO_MIN, EDAD_MAX
+- Se creó `ParametroJpaEntity` en `infrastructure/adapter/out/persistence/` con mapeo JPA a tabla PARAMETRO_RAMO y métodos `fromDomain`/`toDomain`
+- Se creó `ParametroJpaJpaRepository` (Spring Data JPA) para operaciones CRUD sobre PARAMETRO_RAMO
+- Se creó `JpaParametroAdapter` en `infrastructure/adapter/out/persistence/` con `@Profile("real")` que adapta entre dominio y JPA
+- Se registró `ParametroNotFoundException` en `GlobalExceptionHandler` para mapeo a 404 Not Found
 
 ### Eliminado
 - Se eliminaron archivos `.gitkeep` de los paquetes: `infrastructure/config`, `infrastructure/filter`, `infrastructure/adapter/in/rest`, `infrastructure/adapter/out/persistence`, `infrastructure/adapter/out/mock`

@@ -1,0 +1,57 @@
+<div class="editar-container">
+  <h2>Editar Parámetro</h2>
+
+  @if (isLoadingData) {
+    <p class="loading-text">Cargando datos del parámetro...</p>
+  }
+
+  @if (!isLoadingData && parametro) {
+    <div class="parametro-info">
+      <p><strong>Código:</strong> {{ parametro.codigo }}</p>
+      <p><strong>Estado:</strong> {{ parametro.estado }}</p>
+      <p><strong>Rango permitido:</strong> {{ parametro.rangoMinimo }} - {{ parametro.rangoMaximo }}</p>
+    </div>
+
+    <form [formGroup]="editarForm" (ngSubmit)="onSubmit()" class="editar-form" novalidate>
+      <div class="form-group">
+        <label for="valor">Valor</label>
+        <input id="valor" type="text" formControlName="valor"
+               placeholder="Ingrese el nuevo valor" />
+        @if (editarForm.get('valor')?.invalid && editarForm.get('valor')?.touched) {
+          <span class="error-text">Ingrese un valor</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="descripcion">Descripción</label>
+        <input id="descripcion" type="text" formControlName="descripcion"
+               placeholder="Ingrese la descripción (opcional)" />
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" [disabled]="isLoading" class="btn-primary">
+          {{ isLoading ? 'Guardando...' : 'Guardar Cambios' }}
+        </button>
+        <button type="button" class="btn-secondary" (click)="goBack()">Volver</button>
+      </div>
+    </form>
+  }
+
+  @if (!isLoadingData && !parametro && !errorMessage) {
+    <div class="alert alert-warning">Parámetro no encontrado</div>
+  }
+
+  @if (successMessage) {
+    <div class="alert alert-success">{{ successMessage }}</div>
+  }
+
+  @if (errorMessage) {
+    <div class="alert alert-error">{{ errorMessage }}</div>
+  }
+
+  @if (!isLoadingData && !parametro) {
+    <div class="actions">
+      <button class="btn-secondary" (click)="goBack()">Volver</button>
+    </div>
+  }
+</div>

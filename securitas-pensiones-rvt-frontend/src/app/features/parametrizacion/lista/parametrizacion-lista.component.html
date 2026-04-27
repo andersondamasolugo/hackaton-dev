@@ -1,0 +1,50 @@
+<div class="parametrizacion-container">
+  <h2>Parametrización del Ramo</h2>
+
+  @if (isLoading) {
+    <p class="loading-text">Cargando parámetros...</p>
+  }
+
+  @if (!isLoading && parametros.length > 0) {
+    <div class="table-container">
+      <table class="parametros-table">
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Descripción</th>
+            <th>Valor Actual</th>
+            <th>Estado</th>
+            <th>Rango (Mín - Máx)</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (p of parametros; track p.parametroId) {
+            <tr>
+              <td>{{ p.codigo }}</td>
+              <td>{{ p.descripcion }}</td>
+              <td>{{ p.valor }}</td>
+              <td>{{ p.estado }}</td>
+              <td>{{ p.rangoMinimo }} - {{ p.rangoMaximo }}</td>
+              <td>
+                <button class="btn-edit" (click)="onEdit(p.parametroId)">Editar</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  @if (!isLoading && parametros.length === 0 && !errorMessage) {
+    <div class="alert alert-warning">No se encontraron parámetros configurados</div>
+  }
+
+  @if (errorMessage) {
+    <div class="alert alert-error">{{ errorMessage }}</div>
+  }
+
+  <div class="actions">
+    <button class="btn-secondary" (click)="goToMenu()">Volver al Menú</button>
+  </div>
+</div>

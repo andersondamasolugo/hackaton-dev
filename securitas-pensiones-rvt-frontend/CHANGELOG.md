@@ -32,3 +32,9 @@ y este proyecto adhiere a [Versionamiento Semántico](https://semver.org/lang/es
 - Se implementó `ClienteService` con métodos `buscar()` (query params dinámicos con HttpParams) y `consultarDetalle()` consumiendo endpoints REST del backend
 - Se implementó `ClientesBusquedaComponent` standalone con formulario de 3 filtros (tipoIdentificacion, numeroIdentificacion, nombre), validación de al menos un criterio, tabla de resultados con navegación al detalle por clic en fila
 - Se implementó `ClientesDetalleComponent` standalone con vista de detalle consolidado (nombre, identificación, estado, dirección, teléfono, email), tabla de pólizas asociadas y botón volver
+- Se implementó `ParametroService` con métodos `listar()` y `actualizar()` consumiendo endpoints REST `/parametros` del backend
+- Se implementó `ParametrizacionListaComponent` standalone con tabla de parámetros (código, descripción, valor actual, estado, rango mín-máx) y botón de edición por fila
+- Se implementó `ParametrizacionEditarComponent` standalone con formulario reactivo (valor, descripción), información de rango como referencia de solo lectura y manejo de errores 400 (valor fuera de rango) / 404
+- Se creó stylesheet global `src/styles.scss` con paleta corporativa Seguros Bolívar (CSS custom properties), estilos unificados para formularios, botones, tablas, alertas, cards, badges, loading states y utilidades de layout
+- Se agregó enlace a Google Material Icons en `index.html` para iconos del menú
+- Se simplificaron todos los archivos CSS de componentes para usar estilos globales, dejando solo overrides de layout específicos

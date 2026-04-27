@@ -1,11 +1,7 @@
 /* Layout-only overrides — visual styles handled by global styles.scss */
 
-.beneficiarios-container {
-  max-width: 800px;
+.parametrizacion-container {
+  max-width: 900px;
   margin: 2rem auto;
   padding: 2rem;
-}
-
-.search-form .form-group {
-  flex: 1;
 }
