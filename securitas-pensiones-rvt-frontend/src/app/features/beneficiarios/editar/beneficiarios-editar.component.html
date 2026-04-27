@@ -1,6 +1,10 @@
 <div class="editar-container">
   <h2>Editar Beneficiario</h2>
 
+  @if (isLoadingData()) {
+    <p class="loading-text">Cargando datos del beneficiario...</p>
+  }
+
   <form [formGroup]="editarForm" (ngSubmit)="onSubmit()" class="editar-form" novalidate>
     <div class="form-group">
       <label for="nombreCompleto">Nombre Completo</label>
@@ -20,57 +24,39 @@
         <option value="NIT">NIT</option>
         <option value="PA">Pasaporte</option>
       </select>
-      @if (editarForm.get('tipoIdentificacion')?.invalid && editarForm.get('tipoIdentificacion')?.touched) {
-        <span class="error-text">Seleccione un tipo de identificación</span>
-      }
     </div>
 
     <div class="form-group">
       <label for="numeroIdentificacion">Número de Identificación</label>
       <input id="numeroIdentificacion" type="text" formControlName="numeroIdentificacion"
              placeholder="Ingrese número de identificación" />
-      @if (editarForm.get('numeroIdentificacion')?.invalid && editarForm.get('numeroIdentificacion')?.touched) {
-        <span class="error-text">Ingrese el número de identificación</span>
-      }
     </div>
 
     <div class="form-group">
       <label for="parentesco">Parentesco</label>
       <input id="parentesco" type="text" formControlName="parentesco"
              placeholder="Ej: Cónyuge, Hijo, Padre" />
-      @if (editarForm.get('parentesco')?.invalid && editarForm.get('parentesco')?.touched) {
-        <span class="error-text">Ingrese el parentesco</span>
-      }
     </div>
 
     <div class="form-group">
       <label for="porcentajeParticipacion">Porcentaje de Participación</label>
       <input id="porcentajeParticipacion" type="number" formControlName="porcentajeParticipacion"
              placeholder="0 - 100" min="0" max="100" step="1" />
-      @if (editarForm.get('porcentajeParticipacion')?.hasError('required') && editarForm.get('porcentajeParticipacion')?.touched) {
-        <span class="error-text">Ingrese el porcentaje de participación</span>
-      }
-      @if (editarForm.get('porcentajeParticipacion')?.hasError('min') && editarForm.get('porcentajeParticipacion')?.touched) {
-        <span class="error-text">El porcentaje no puede ser negativo</span>
-      }
-      @if (editarForm.get('porcentajeParticipacion')?.hasError('max') && editarForm.get('porcentajeParticipacion')?.touched) {
-        <span class="error-text">El porcentaje no puede superar 100</span>
-      }
     </div>
 
     <div class="form-actions">
-      <button type="submit" [disabled]="isLoading" class="btn-primary">
-        {{ isLoading ? 'Guardando...' : 'Guardar Cambios' }}
+      <button type="submit" [disabled]="isLoading()" class="btn-primary">
+        {{ isLoading() ? 'Guardando...' : 'Guardar Cambios' }}
       </button>
       <button type="button" class="btn-secondary" (click)="goBack()">Volver</button>
     </div>
   </form>
 
-  @if (successMessage) {
-    <div class="alert alert-success">{{ successMessage }}</div>
+  @if (successMessage(); as msg) {
+    <div class="alert alert-success">{{ msg }}</div>
   }
 
-  @if (errorMessage) {
-    <div class="alert alert-error">{{ errorMessage }}</div>
+  @if (errorMessage(); as msg) {
+    <div class="alert alert-error">{{ msg }}</div>
   }
 </div>

@@ -54,7 +54,9 @@ export class BeneficiariosListaComponent {
   }
 
   onEdit(beneficiarioId: number): void {
-    this.router.navigate(['/beneficiarios/editar', beneficiarioId]);
+    this.router.navigate(['/beneficiarios/editar', beneficiarioId], {
+      queryParams: { poliza: this.numeroPoliza }
+    });
   }
 
   goToMenu(): void {

@@ -1,14 +1,15 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 
 import { BeneficiarioService } from '../beneficiario.service';
+import { BeneficiarioResponse } from '../../../shared/models';
 
 /**
  * Componente de edición de beneficiarios.
- * Formulario reactivo para actualizar datos de un beneficiario.
- * Muestra mensajes de éxito/error incluyendo porcentaje excedido (400).
+ * Carga datos del beneficiario desde la lista de la póliza.
+ * Usa signals para detección de cambios confiable.
  */
 @Component({
   selector: 'app-beneficiarios-editar',
@@ -22,45 +23,66 @@ export class BeneficiariosEditarComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
 
-  /** Identificador del beneficiario obtenido de la ruta. */
   beneficiarioId = 0;
+  numeroPoliza = '';
+  beneficiario = signal<BeneficiarioResponse | null>(null);
+  isLoadingData = signal(false);
+  isLoading = signal(false);
+  successMessage = signal('');
+  errorMessage = signal('');
 
-  /** Formulario reactivo de edición. */
   editarForm = this.fb.nonNullable.group({
     nombreCompleto: ['', Validators.required],
     tipoIdentificacion: ['', Validators.required],
     numeroIdentificacion: ['', Validators.required],
     parentesco: ['', Validators.required],
-    porcentajeParticipacion: [
-      0,
-      [Validators.required, Validators.min(0), Validators.max(100)],
-    ],
+    porcentajeParticipacion: [0, [Validators.required, Validators.min(0), Validators.max(100)]],
   });
-
-  /** Indica si hay una petición en curso. */
-  isLoading = false;
-
-  /** Mensaje de éxito mostrado al usuario. */
-  successMessage = '';
-
-  /** Mensaje de error mostrado al usuario. */
-  errorMessage = '';
 
   ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('id');
     this.beneficiarioId = idParam ? Number(idParam) : 0;
+    this.numeroPoliza = this.route.snapshot.queryParamMap.get('poliza') ?? '';
+
+    if (this.numeroPoliza) {
+      this.loadBeneficiario();
+    }
   }
 
-  /** Envía el formulario de actualización al backend. */
+  private loadBeneficiario(): void {
+    this.isLoadingData.set(true);
+
+    this.beneficiarioService.listarPorPoliza(this.numeroPoliza).subscribe({
+      next: (lista) => {
+        const found = lista.find(b => b.beneficiarioId === this.beneficiarioId);
+        if (found) {
+          this.beneficiario.set(found);
+          this.editarForm.patchValue({
+            nombreCompleto: found.nombreCompleto,
+            tipoIdentificacion: found.tipoIdentificacion,
+            numeroIdentificacion: found.numeroIdentificacion,
+            parentesco: found.parentesco,
+            porcentajeParticipacion: Number(found.porcentajeParticipacion),
+          });
+        }
+        this.isLoadingData.set(false);
+      },
+      error: () => {
+        this.isLoadingData.set(false);
+        this.errorMessage.set('Error al cargar datos del beneficiario.');
+      },
+    });
+  }
+
   onSubmit(): void {
     if (this.editarForm.invalid) {
       this.editarForm.markAllAsTouched();
       return;
     }
 
-    this.isLoading = true;
-    this.successMessage = '';
-    this.errorMessage = '';
+    this.isLoading.set(true);
+    this.successMessage.set('');
+    this.errorMessage.set('');
 
     const formValue = this.editarForm.getRawValue();
 
@@ -74,27 +96,22 @@ export class BeneficiariosEditarComponent implements OnInit {
       })
       .subscribe({
         next: () => {
-          this.successMessage = 'Beneficiario actualizado exitosamente';
-          this.isLoading = false;
+          this.successMessage.set('Beneficiario actualizado exitosamente');
+          this.isLoading.set(false);
         },
         error: (err: HttpErrorResponse) => {
-          this.isLoading = false;
+          this.isLoading.set(false);
           if (err.status === 400) {
-            const body = err.error;
-            this.errorMessage =
-              body?.message ??
-              'La suma de porcentajes de participación supera el 100%';
+            this.errorMessage.set(err.error?.message ?? 'La suma de porcentajes supera el 100%');
           } else if (err.status === 404) {
-            this.errorMessage = 'Beneficiario no encontrado';
+            this.errorMessage.set('Beneficiario no encontrado');
           } else {
-            this.errorMessage =
-              'Error al actualizar el beneficiario. Intente nuevamente.';
+            this.errorMessage.set('Error al actualizar. Intente nuevamente.');
           }
         },
       });
   }
 
-  /** Navega de vuelta a la lista de beneficiarios. */
   goBack(): void {
     this.router.navigate(['/beneficiarios']);
   }
