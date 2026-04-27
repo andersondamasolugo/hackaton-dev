@@ -1,0 +1,63 @@
+<div class="menu-container">
+  <aside class="menu-sidebar">
+    <div class="menu-header">
+      <h2>Rentas Voluntarias</h2>
+      <p class="menu-subtitle">Sistema de Gestión</p>
+    </div>
+
+    @if (isLoading) {
+      <div class="menu-loading">Cargando menú...</div>
+    }
+
+    @if (errorMessage) {
+      <div class="menu-error" role="alert">{{ errorMessage }}</div>
+    }
+
+    <nav class="menu-nav" aria-label="Menú principal">
+      @for (category of categories; track category.id) {
+        <div class="menu-category">
+          <button
+            class="category-header"
+            [attr.aria-expanded]="isCategoryExpanded(category.id)"
+            [attr.aria-controls]="'category-' + category.id"
+            (click)="toggleCategory(category.id)"
+          >
+            <span class="category-icon material-icons">{{ category.icon }}</span>
+            <span class="category-label">{{ category.label }}</span>
+            <span class="category-toggle material-icons">
+              {{ isCategoryExpanded(category.id) ? 'expand_less' : 'expand_more' }}
+            </span>
+          </button>
+
+          @if (isCategoryExpanded(category.id)) {
+            <ul
+              class="category-items"
+              [id]="'category-' + category.id"
+              role="list"
+            >
+              @for (item of category.items; track item.id) {
+                <li>
+                  <button
+                    class="menu-item"
+                    (click)="navigateTo(item)"
+                    [title]="item.label"
+                  >
+                    <span class="item-icon material-icons">{{ item.icon }}</span>
+                    <span class="item-label">{{ item.label }}</span>
+                  </button>
+                </li>
+              }
+            </ul>
+          }
+        </div>
+      }
+    </nav>
+
+    <div class="menu-footer">
+      <button class="logout-btn" (click)="logout()">
+        <span class="material-icons">logout</span>
+        <span>Cerrar Sesión</span>
+      </button>
+    </div>
+  </aside>
+</div>

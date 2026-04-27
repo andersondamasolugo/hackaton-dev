@@ -1,0 +1,54 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /rvt/api/v1
+
+spring:
+  profiles:
+    active: mock
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.OracleDialect
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: method
+
+---
+spring:
+  config:
+    activate:
+      on-profile: mock
+  datasource:
+    url: jdbc:h2:mem:rvtdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+  h2:
+    console:
+      enabled: true
+
+---
+spring:
+  config:
+    activate:
+      on-profile: real
+  datasource:
+    url: "jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(COMMUNITY=tcp.world)(PROTOCOL=TCP)(HOST=10.1.7.81)(PORT=1521))(CONNECT_DATA=(SID=svpa)))"
+    username: rvt
+    password: ${DB_PASSWORD:rvt}
+    driver-class-name: oracle.jdbc.OracleDriver

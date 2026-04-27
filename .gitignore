@@ -1,0 +1,30 @@
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Backend - Java/Gradle
+securitas-pensiones-rvt-backend/.gradle/
+securitas-pensiones-rvt-backend/build/
+securitas-pensiones-rvt-backend/bin/
+securitas-pensiones-rvt-backend/gradle/wrapper/gradle-wrapper.jar
+
+# Frontend - Angular/Node
+securitas-pensiones-rvt-frontend/node_modules/
+securitas-pensiones-rvt-frontend/dist/
+securitas-pensiones-rvt-frontend/.angular/
+
+# Kiro
+.kiro/
+
+# Repos restringidos (solo análisis, no subir)
+securitas-pensiones-forms/
+securitas-pensiones-reports/
+securitas-pensiones-rvt-oracle-db/
+
+# Environment files with secrets
+*.env

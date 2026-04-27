@@ -1,0 +1,71 @@
+<div class="consultar-container">
+  <h2>Consultar Póliza</h2>
+
+  <div class="search-form">
+    <div class="form-group">
+      <label for="numeroPoliza">Número de Póliza</label>
+      <input id="numeroPoliza" type="text" [(ngModel)]="numeroPoliza"
+             placeholder="Ej: RVT-a1b2c3d4" (keyup.enter)="onSearch()" />
+    </div>
+    <button class="btn-primary" (click)="onSearch()" [disabled]="isLoading || !numeroPoliza.trim()">
+      {{ isLoading ? 'Buscando...' : 'Buscar' }}
+    </button>
+  </div>
+
+  @if (poliza) {
+    <div class="poliza-detail">
+      <h3>Datos de la Póliza</h3>
+      <div class="detail-grid">
+        <div class="detail-item">
+          <span class="label">Número</span>
+          <span class="value">{{ poliza.numeroPoliza }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Estado</span>
+          <span class="value">
+            <span class="badge" [class.badge-pendiente]="poliza.estado === 'PENDIENTE'"
+                  [class.badge-activa]="poliza.estado === 'ACTIVA'">
+              {{ poliza.estado }}
+            </span>
+          </span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Tipo Identificación</span>
+          <span class="value">{{ poliza.tipoIdentificacion }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Número Identificación</span>
+          <span class="value">{{ poliza.numeroIdentificacion }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Nombre Tomador</span>
+          <span class="value">{{ poliza.nombreTomador }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Fecha Inicio Vigencia</span>
+          <span class="value">{{ poliza.fechaInicioVigencia }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Monto Renta</span>
+          <span class="value">{{ poliza.montoRenta | number:'1.2-2' }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Fecha Creación</span>
+          <span class="value">{{ poliza.fechaCreacion }}</span>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (notFoundMessage) {
+    <div class="alert alert-warning">{{ notFoundMessage }}</div>
+  }
+
+  @if (errorMessage) {
+    <div class="alert alert-error">{{ errorMessage }}</div>
+  }
+
+  <div class="actions">
+    <button class="btn-secondary" (click)="goToMenu()">Volver al Menú</button>
+  </div>
+</div>

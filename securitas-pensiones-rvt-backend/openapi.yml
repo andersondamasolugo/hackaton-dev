@@ -1,0 +1,621 @@
+openapi: 3.0.3
+info:
+  title: RVT - Rentas Voluntarias API
+  description: API del demo funcional vertical de Rentas Voluntarias para Seguros Bolívar.
+  version: 1.0.0
+  contact:
+    name: Equipo RVT Hackathon
+
+servers:
+  - url: /rvt/api/v1
+    description: Base path del API
+
+paths:
+  /auth/login:
+    post:
+      tags:
+        - Autenticación
+      summary: Autenticar usuario
+      description: Valida credenciales y retorna token JWT.
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Autenticación exitosa
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Credenciales inválidas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /menu/tree:
+    get:
+      tags:
+        - Menú
+      summary: Obtener árbol de categorías
+      description: Retorna la estructura jerárquica del menú de navegación.
+      operationId: getMenuTree
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Árbol de menú
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MenuTreeResponse'
+
+  /polizas/expedir:
+    post:
+      tags:
+        - Pólizas
+      summary: Expedir póliza de Rentas Voluntarias
+      description: Crea una nueva póliza en estado PENDIENTE.
+      operationId: expedirPoliza
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExpedirPolizaRequest'
+      responses:
+        '201':
+          description: Póliza expedida exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolizaResponse'
+        '400':
+          description: Datos de expedición inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /polizas/consultar/{numeroPoliza}:
+    get:
+      tags:
+        - Pólizas
+      summary: Consultar póliza por número
+      description: Retorna los datos de una póliza existente.
+      operationId: consultarPoliza
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: numeroPoliza
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Datos de la póliza
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolizaResponse'
+        '404':
+          description: Póliza no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /polizas/activar/{numeroPoliza}:
+    put:
+      tags:
+        - Pólizas
+      summary: Activar póliza
+      description: Cambia el estado de una póliza de PENDIENTE a ACTIVA.
+      operationId: activarPoliza
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: numeroPoliza
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Póliza activada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolizaResponse'
+        '404':
+          description: Póliza no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Póliza no se puede activar (estado no es PENDIENTE)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /beneficiarios/poliza/{numeroPoliza}:
+    get:
+      tags:
+        - Beneficiarios
+      summary: Listar beneficiarios de una póliza
+      description: Retorna la lista de beneficiarios asociados a una póliza.
+      operationId: listarBeneficiariosPorPoliza
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: numeroPoliza
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de beneficiarios
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BeneficiarioResponse'
+
+  /beneficiarios/{beneficiarioId}:
+    put:
+      tags:
+        - Beneficiarios
+      summary: Actualizar beneficiario
+      description: Actualiza los datos de un beneficiario existente.
+      operationId: actualizarBeneficiario
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: beneficiarioId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActualizarBeneficiarioRequest'
+      responses:
+        '200':
+          description: Beneficiario actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BeneficiarioResponse'
+        '400':
+          description: Datos inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Beneficiario no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /clientes/buscar:
+    get:
+      tags:
+        - Clientes
+      summary: Buscar clientes
+      description: Busca clientes por criterios de filtro. Al menos un filtro es requerido.
+      operationId: buscarClientes
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tipoId
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: numeroId
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: nombre
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de clientes encontrados
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ClienteResponse'
+        '400':
+          description: Ningún filtro proporcionado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /clientes/{clienteId}:
+    get:
+      tags:
+        - Clientes
+      summary: Consultar detalle de cliente
+      description: Retorna información consolidada de un cliente.
+      operationId: consultarDetalleCliente
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: clienteId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Detalle del cliente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClienteDetalleResponse'
+        '404':
+          description: Cliente no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /parametros:
+    get:
+      tags:
+        - Parametrización
+      summary: Listar parámetros del ramo
+      description: Retorna todos los parámetros configurados para el ramo RV.
+      operationId: listarParametros
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de parámetros
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ParametroResponse'
+
+  /parametros/{parametroId}:
+    put:
+      tags:
+        - Parametrización
+      summary: Actualizar parámetro
+      description: Actualiza el valor de un parámetro del ramo.
+      operationId: actualizarParametro
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: parametroId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActualizarParametroRequest'
+      responses:
+        '200':
+          description: Parámetro actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParametroResponse'
+        '400':
+          description: Valor fuera de rango o datos inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Parámetro no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    LoginRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          description: Nombre de usuario
+        password:
+          type: string
+          description: Contraseña
+          format: password
+
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: Token JWT generado
+        expiresIn:
+          type: integer
+          format: int64
+          description: Tiempo de expiración en segundos
+        username:
+          type: string
+          description: Nombre de usuario autenticado
+
+    MenuTreeResponse:
+      type: object
+      properties:
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/MenuCategory'
+
+    MenuCategory:
+      type: object
+      properties:
+        id:
+          type: string
+        label:
+          type: string
+        icon:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/MenuItem'
+
+    MenuItem:
+      type: object
+      properties:
+        id:
+          type: string
+        label:
+          type: string
+        route:
+          type: string
+        icon:
+          type: string
+
+    ExpedirPolizaRequest:
+      type: object
+      required:
+        - tipoIdentificacion
+        - numeroIdentificacion
+        - nombreTomador
+        - fechaInicioVigencia
+        - montoRenta
+      properties:
+        tipoIdentificacion:
+          type: string
+          description: "Tipo de identificación (CC, CE, NIT, PA)"
+        numeroIdentificacion:
+          type: string
+        nombreTomador:
+          type: string
+        fechaInicioVigencia:
+          type: string
+          format: date
+        montoRenta:
+          type: number
+          format: decimal
+          minimum: 0
+          exclusiveMinimum: true
+
+    PolizaResponse:
+      type: object
+      properties:
+        numeroPoliza:
+          type: string
+        estado:
+          type: string
+          enum:
+            - PENDIENTE
+            - ACTIVA
+        tipoIdentificacion:
+          type: string
+        numeroIdentificacion:
+          type: string
+        nombreTomador:
+          type: string
+        fechaInicioVigencia:
+          type: string
+          format: date
+        montoRenta:
+          type: number
+          format: decimal
+        fechaCreacion:
+          type: string
+          format: date-time
+
+    ActualizarBeneficiarioRequest:
+      type: object
+      required:
+        - nombreCompleto
+        - tipoIdentificacion
+        - numeroIdentificacion
+        - parentesco
+        - porcentajeParticipacion
+      properties:
+        nombreCompleto:
+          type: string
+        tipoIdentificacion:
+          type: string
+        numeroIdentificacion:
+          type: string
+        parentesco:
+          type: string
+        porcentajeParticipacion:
+          type: number
+          format: decimal
+          minimum: 0
+          maximum: 100
+
+    BeneficiarioResponse:
+      type: object
+      properties:
+        beneficiarioId:
+          type: integer
+          format: int64
+        numeroPoliza:
+          type: string
+        nombreCompleto:
+          type: string
+        tipoIdentificacion:
+          type: string
+        numeroIdentificacion:
+          type: string
+        parentesco:
+          type: string
+        porcentajeParticipacion:
+          type: number
+          format: decimal
+
+    ClienteResponse:
+      type: object
+      properties:
+        clienteId:
+          type: integer
+          format: int64
+        tipoIdentificacion:
+          type: string
+        numeroIdentificacion:
+          type: string
+        nombre:
+          type: string
+        estado:
+          type: string
+        numeroPolizas:
+          type: integer
+
+    ClienteDetalleResponse:
+      type: object
+      properties:
+        clienteId:
+          type: integer
+          format: int64
+        tipoIdentificacion:
+          type: string
+        numeroIdentificacion:
+          type: string
+        nombre:
+          type: string
+        estado:
+          type: string
+        direccion:
+          type: string
+        telefono:
+          type: string
+        email:
+          type: string
+        polizas:
+          type: array
+          items:
+            $ref: '#/components/schemas/PolizaResumen'
+
+    PolizaResumen:
+      type: object
+      properties:
+        numeroPoliza:
+          type: string
+        estado:
+          type: string
+        montoRenta:
+          type: number
+          format: decimal
+
+    ActualizarParametroRequest:
+      type: object
+      required:
+        - valor
+      properties:
+        valor:
+          type: string
+        descripcion:
+          type: string
+
+    ParametroResponse:
+      type: object
+      properties:
+        parametroId:
+          type: integer
+          format: int64
+        codigo:
+          type: string
+        descripcion:
+          type: string
+        valor:
+          type: string
+        estado:
+          type: string
+        rangoMinimo:
+          type: string
+        rangoMaximo:
+          type: string
+
+    ErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+        error:
+          type: string
+        message:
+          type: string
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldError'
+        correlationId:
+          type: string
+
+    FieldError:
+      type: object
+      properties:
+        field:
+          type: string
+        message:
+          type: string

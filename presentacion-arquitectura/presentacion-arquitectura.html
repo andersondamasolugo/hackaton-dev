@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="es" data-brand="seguros-bolivar" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Modernización Sistema de Pensiones — Arquitectura</title>
+
+  <!-- Design System Seguros Bolívar -->
+  <link rel="preload" href="https://unpkg.com/@seguros-bolivar/ui-bundle@latest/dist/sb-ui-seguros-bolivar-light.min.css" as="style">
+  <link rel="stylesheet" href="https://unpkg.com/@seguros-bolivar/ui-bundle@latest/dist/sb-ui-seguros-bolivar-light.min.css">
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Material Symbols -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --color-primary: #048652;
+      --color-primary-dark: #036b42;
+      --color-accent: #FFD050;
+      --color-background: #f5f8f7;
+      --color-surface: #FFFFFF;
+      --color-surface-secondary: #f8fafc;
+      --color-text-primary: #111815;
+      --color-text-secondary: #5f8c7a;
+      --color-text-muted: #64748B;
+      --color-border: #E2E8F0;
+      --color-success: #10B981;
+      --color-warning: #F59E0B;
+      --color-error: #EF4444;
+      --color-info: #3B82F6;
+      --font-family-display: "Inter", system-ui, -apple-system, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-family-display);
+      background-color: var(--color-background);
+      color: var(--color-text-primary);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      line-height: 1.6;
+    }
+
+    .material-symbols-outlined {
+      font-family: 'Material Symbols Outlined';
+      font-weight: normal;
+      font-style: normal;
+      font-size: 24px;
+      line-height: 1;
+      letter-spacing: normal;
+      text-transform: none;
+      display: inline-block;
+      white-space: nowrap;
+      direction: ltr;
+      -webkit-font-feature-settings: 'liga';
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ===== LAYOUT ===== */
+    .page-wrapper {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ===== HERO ===== */
+    .hero {
+      background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 60%, #024a2e 100%);
+      color: white;
+      padding: 80px 0 60px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -20%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(255,208,80,0.12) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: -30%;
+      left: -10%;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .hero .page-wrapper { position: relative; z-index: 1; }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 100px;
+      padding: 6px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 24px;
+    }
+    .hero h1 {
+      font-size: 42px;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin-bottom: 16px;
+    }
+    .hero h1 span { color: var(--color-accent); }
+    .hero p {
+      font-size: 18px;
+      font-weight: 400;
+      opacity: 0.9;
+      max-width: 700px;
+      line-height: 1.7;
+    }
+    .hero-meta {
+      display: flex;
+      gap: 32px;
+      margin-top: 32px;
+      flex-wrap: wrap;
+    }
+    .hero-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      opacity: 0.85;
+    }
+    .hero-meta-item .material-symbols-outlined { font-size: 18px; }
+
+    /* ===== QUOTE BANNER ===== */
+    .quote-banner {
+      background: var(--color-surface);
+      border-left: 4px solid var(--color-accent);
+      border-radius: 0 12px 12px 0;
+      padding: 24px 32px;
+      margin: -30px auto 0;
+      max-width: 1152px;
+      position: relative;
+      z-index: 10;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    }
+    .quote-banner p {
+      font-size: 16px;
+      font-weight: 600;
+      font-style: italic;
+      color: var(--color-primary-dark);
+      line-height: 1.6;
+    }
+
+    /* ===== SECTION ===== */
+    section { padding: 60px 0; }
+    .section-header {
+      margin-bottom: 40px;
+    }
+    .section-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--color-primary);
+      margin-bottom: 8px;
+    }
+    .section-title {
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      color: var(--color-text-primary);
+    }
+    .section-subtitle {
+      font-size: 15px;
+      color: var(--color-text-muted);
+      margin-top: 8px;
+      max-width: 600px;
+    }
+
+    /* ===== DECISION CARDS ===== */
+    .decisions-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 20px;
+    }
+    .decision-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .decision-card:hover {
+      box-shadow: 0 8px 32px rgba(4,134,82,0.1);
+      transform: translateY(-2px);
+    }
+    .decision-card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 20px 24px 0;
+    }
+    .decision-number {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: var(--color-primary);
+      color: white;
+      font-size: 14px;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+    .decision-card-header h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      line-height: 1.3;
+    }
+    .decision-card-body {
+      padding: 16px 24px 20px;
+    }
+    .decision-card-body p {
+      font-size: 13px;
+      color: var(--color-text-muted);
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+    .decision-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 4px 10px;
+      border-radius: 6px;
+      margin-right: 6px;
+      margin-bottom: 6px;
+    }
+    .tag-justification {
+      background: #EFF6FF;
+      color: #1D4ED8;
+      border: 1px solid #BFDBFE;
+    }
+    .tag-benefit {
+      background: #ECFDF5;
+      color: #047857;
+      border: 1px solid #A7F3D0;
+    }
+
+    /* ===== ARCHITECTURE DIAGRAM ===== */
+    .arch-diagram {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 16px;
+      padding: 40px;
+      margin-top: 40px;
+    }
+    .arch-layers {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .arch-layer {
+      border-radius: 12px;
+      padding: 24px;
+      position: relative;
+    }
+    .arch-layer-title {
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .arch-layer-title .material-symbols-outlined { font-size: 18px; }
+    .layer-frontend {
+      background: linear-gradient(135deg, #ECFDF5, #D1FAE5);
+      border: 1px solid #A7F3D0;
+    }
+    .layer-frontend .arch-layer-title { color: #047857; }
+    .layer-backend {
+      background: linear-gradient(135deg, #EFF6FF, #DBEAFE);
+      border: 1px solid #93C5FD;
+    }
+    .layer-backend .arch-layer-title { color: #1D4ED8; }
+    .layer-infra {
+      background: linear-gradient(135deg, #FFF7ED, #FED7AA);
+      border: 1px solid #FDBA74;
+    }
+    .layer-infra .arch-layer-title { color: #C2410C; }
+    .layer-legacy {
+      background: linear-gradient(135deg, #F5F3FF, #EDE9FE);
+      border: 1px solid #C4B5FD;
+    }
+    .layer-legacy .arch-layer-title { color: #6D28D9; }
+    .arch-components {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .arch-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      background: rgba(255,255,255,0.7);
+      border: 1px solid rgba(0,0,0,0.08);
+    }
+    .arch-chip .material-symbols-outlined { font-size: 16px; }
+    .arch-arrow {
+      display: flex;
+      justify-content: center;
+      padding: 4px 0;
+      color: var(--color-text-muted);
+    }
+    .arch-arrow .material-symbols-outlined { font-size: 28px; }
+
+    /* ===== STRATEGY TIMELINE ===== */
+    .timeline {
+      position: relative;
+      padding-left: 40px;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 15px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--color-primary), var(--color-accent));
+      border-radius: 2px;
+    }
+    .timeline-item {
+      position: relative;
+      margin-bottom: 32px;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      padding: 24px;
+    }
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -33px;
+      top: 28px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      border: 3px solid var(--color-background);
+    }
+    .timeline-item h4 {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .timeline-item p {
+      font-size: 13px;
+      color: var(--color-text-muted);
+      line-height: 1.6;
+    }
+
+    /* ===== DOMAINS GRID ===== */
+    .domains-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .domain-chip {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 16px;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .domain-chip:hover {
+      border-color: var(--color-primary);
+      background: #ECFDF5;
+    }
+    .domain-chip .material-symbols-outlined {
+      font-size: 20px;
+      color: var(--color-primary);
+    }
+
+    /* ===== CONCLUSION ===== */
+    .conclusion {
+      background: linear-gradient(135deg, var(--color-primary-dark) 0%, #024a2e 100%);
+      color: white;
+      padding: 60px 0;
+      margin-top: 20px;
+    }
+    .conclusion h2 {
+      font-size: 28px;
+      font-weight: 900;
+      margin-bottom: 20px;
+      letter-spacing: -0.02em;
+    }
+    .conclusion p {
+      font-size: 16px;
+      line-height: 1.8;
+      opacity: 0.92;
+      max-width: 900px;
+    }
+    .conclusion-highlights {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+      margin-top: 32px;
+    }
+    .conclusion-highlight {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 10px;
+      backdrop-filter: blur(10px);
+    }
+    .conclusion-highlight .material-symbols-outlined {
+      font-size: 28px;
+      color: var(--color-accent);
+    }
+    .conclusion-highlight span {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    /* ===== FOOTER ===== */
+    footer {
+      background: var(--color-surface);
+      border-top: 1px solid var(--color-border);
+      padding: 20px 0;
+      text-align: center;
+    }
+    footer p {
+      font-size: 12px;
+      color: var(--color-text-muted);
+    }
+
+    /* ===== NAV ===== */
+    .top-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--color-border);
+      padding: 0 24px;
+    }
+    .top-nav-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .top-nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      font-size: 14px;
+      color: var(--color-text-primary);
+    }
+    .top-nav-brand .icon-box {
+      width: 32px;
+      height: 32px;
+      background: var(--color-primary);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .top-nav-brand .icon-box .material-symbols-outlined {
+      font-size: 20px;
+      color: white;
+    }
+    .top-nav-brand span.accent { color: var(--color-primary); }
+    .top-nav-links {
+      display: flex;
+      gap: 4px;
+    }
+    .top-nav-links a {
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--color-text-muted);
+      padding: 8px 14px;
+      border-radius: 8px;
+      transition: all 0.15s;
+    }
+    .top-nav-links a:hover {
+      background: rgba(4,134,82,0.08);
+      color: var(--color-primary);
+    }
+
+    /* ===== PRINT ===== */
+    @media print {
+      .top-nav { display: none; }
+      .hero { padding: 40px 0 30px; }
+      .decision-card:hover { transform: none; box-shadow: none; }
+      section { padding: 30px 0; }
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      .hero h1 { font-size: 28px; }
+      .hero p { font-size: 15px; }
+      .decisions-grid { grid-template-columns: 1fr; }
+      .hero-meta { gap: 16px; }
+      .arch-diagram { padding: 20px; }
+      .top-nav-links { display: none; }
+      .conclusion-highlights { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVIGATION -->
+  <nav class="top-nav">
+    <div class="top-nav-inner">
+      <div class="top-nav-brand">
+        <div class="icon-box">
+          <span class="material-symbols-outlined">architecture</span>
+        </div>
+        Pensiones — <span class="accent">Arquitectura</span>
+      </div>
+      <div class="top-nav-links">
+        <a href="#contexto">Contexto</a>
+        <a href="#decisiones">Decisiones</a>
+        <a href="#arquitectura">Arquitectura</a>
+        <a href="#dominios">Dominios</a>
+        <a href="#estrategia">Estrategia</a>
+        <a href="#conclusion">Conclusión</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="page-wrapper">
+      <div class="hero-badge">
+        <span class="material-symbols-outlined" style="font-size:14px;">verified</span>
+        Mesa Técnica de Arquitectura
+      </div>
+      <h1>Modernización del<br>Sistema de <span>Pensiones</span></h1>
+      <p>Transformación arquitectónica del sistema actual Oracle Forms hacia una plataforma moderna, desacoplada, mantenible y alineada con estándares corporativos.</p>
+      <div class="hero-meta">
+        <div class="hero-meta-item">
+          <span class="material-symbols-outlined">code</span>
+          Angular 21 · MVVM
+        </div>
+        <div class="hero-meta-item">
+          <span class="material-symbols-outlined">dns</span>
+          Java 21 · Hexagonal
+        </div>
+        <div class="hero-meta-item">
+          <span class="material-symbols-outlined">palette</span>
+          @seguros-bolivar/ui-bundle
+        </div>
+        <div class="hero-meta-item">
+          <span class="material-symbols-outlined">security</span>
+          Oracle Access Manager
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- QUOTE -->
+  <div class="page-wrapper">
+    <div class="quote-banner">
+      <p>"La modernización del sistema de pensiones no se concibe como una migración de pantallas Oracle Forms, sino como la construcción de una nueva plataforma modular, segura, escalable y mantenible, alineada con estándares corporativos y preparada para la evolución futura del negocio."</p>
+    </div>
+  </div>
+
+  <!-- CONTEXTO -->
+  <section id="contexto">
+    <div class="page-wrapper">
+      <div class="section-header">
+        <div class="section-label">
+          <span class="material-symbols-outlined" style="font-size:16px;">info</span>
+          Contexto del Proyecto
+        </div>
+        <h2 class="section-title">¿Por qué modernizar?</h2>
+        <p class="section-subtitle">La iniciativa no es una simple migración de pantallas, sino una transformación arquitectónica completa.</p>
+      </div>
+      <div class="decisions-grid">
+        <div class="decision-card">
+          <div class="decision-card-header">
+            <div class="decision-number" style="background:var(--color-error);">
+              <span class="material-symbols-outlined" style="font-size:18px;">warning</span>
+            </div>
+            <h3>Problema Actual</h3>
+          </div>
+          <div class="decision-card-body">
+            <p>Sistema construido en Oracle Forms con alto acoplamiento entre pantallas, lógica y base de datos. Difícil de mantener, escalar y evolucionar.</p>
+            <span class="decision-tag tag-justification">Legado Oracle Forms</span>
+            <span class="decision-tag tag-justification">Alto acoplamiento</span>
+          </div>
+        </div>
+        <div class="decision-card">
+          <div class="decision-card-header">
+            <div class="decision-number" style="background:var(--color-primary);">
+              <span class="material-symbols-outlined" style="font-size:18px;">target</span>
+            </div>
+            <h3>Objetivo</h3>
+          </div>
+          <div class="decision-card-body">
+            <p>Separar responsabilidades, mejorar la experiencia de usuario, reducir la dependencia del legado y habilitar una evolución progresiva del sistema.</p>
+            <span class="decision-tag tag-benefit">Desacoplamiento</span>
+            <span class="decision-tag tag-benefit">Evolución progresiva</span>
+          </div>
+        </div>
+        <div class="decision-card">
+          <div class="decision-card-header">
+            <div class="decision-number" style="background:var(--color-info);">
+              <span class="material-symbols-outlined" style="font-size:18px;">strategy</span>
+            </div>
+            <h3>Estrategia</h3>
+          </div>
+          <div class="decision-card-body">
+            <p>Frontend moderno con Angular, design system corporativo @seguros-bolivar/ui-bundle, y backend desacoplado en Java con arquitectura hexagonal.</p>
+            <span class="decision-tag tag-benefit">Angular 21</span>
+            <span class="decision-tag tag-benefit">Java 21</span>
+            <span class="decision-tag tag-benefit">Hexagonal</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DECISIONES ARQUITECTÓNICAS -->
+  <section id="decisiones" style="background:var(--color-surface);">
+    <div class="page-wrapper">
+      <div class="section-header">
+        <div class="section-label">
+          <span class="material-symbols-outlined" style="font-size:16px;">gavel</span>
+          Decisiones Arquitectónicas
+        </div>
+        <h2 class="section-title">15 Decisiones Clave</h2>
+        <p class="section-subtitle">Cada decisión está respaldada por una justificación técnica y un beneficio esperado.</p>
+      </div>
+      <div class="decisions-grid">
+
+        <!-- Decisión 1 -->
+        <div class="decision-card">
+          <div class="decision-card-header">
+            <div class="decision-number">1</div>
+            <h3>Frontend en Angular 21 — MVVM</h3>
+          </div>
+          <div class="decision-card-body">
+            <p>Angular ofrece un marco sólido para aplicaciones empresariales de gran escala, con política de versiones predecible y soporte LTS por ventanas definidas.</p>
+            <span class="decision-tag tag-benefit">Robustez</span>
+            <span class="decision-tag tag-benefit">Mantenibilidad</span>
+            <span class="decision-tag tag-justification">Evolución controlada</span>
+          </div>
+        </div>
+
+        <!-- Decisión 2 -->
+        <div class="decision-card">
+          <div class="decision-card-header">
+            <div class="decision-number">2</div>
+            <h3>Design System @seguros-bolivar/ui-bundle</h3>
+          </div>
+          <div class="decision-card-body">
+            <p>Uso obligatorio del design system corporativo multi-brand como base visual y de componentes reutilizables. Garantiza uniformidad y alineación corporativa.</p>
+            <span class="decision-tag tag-benefit">Consistencia UX</span>
+            <span class="decision-tag tag-benefit">Aceleración dev</span>
+            <span class="decision-tag tag-justification">Gobierno visual</span>
+          </div>
+        </div>
+
+        <!-- Decisión 3 -->
+        <div class="decision-card">
+          <div class="decision-card-header">
+            <div class="decision-number">3</div>
+            <h3>Arquitectura MVVM en Frontend</h3>
+          </div>
+          <div class="decision-card-body">
+            <p>Separación clara entre vista, lógica de presentación y modelos de datos. Favorece desacoplamiento, pruebas y mantenibilidad en aplicaciones con alta complejidad funcional.</p>
+            <span class="decision-tag tag-benefit">Menor acoplamiento</span>
+            <span class="decision-tag tag-benefit">Escalabilidad</span>
+          </div>
+        </div>
+
+        <!-- Decisión 4 -->
+        <div class="decision-card">
+          <div class="decision-card-header">
+            <div class="decision-number">4</div>
+            <h3>Microfrontend por Dominios</h3>
+          </div>
+          <div class="decision-card-body">
+            <p>Segmentación por capacidades de negocio (no por pantallas). Angular soporta federation para independencia de despliegue y evolución por equipos.</p>
+            <span class="decision-tag tag-benefit">Independencia de despliegue</span>
+            <span class="decision-tag tag-justification">Aislamiento funcional</span>
+          </div>
+        </div>
+
+        <!-- Decisión 5 -->
+        <div class="decision-card">
+          <div class="decision-card-header">
+            <div class="decision-number">5</div>
+            <h3>Seguridad — Oracle Access Manager</h3>
+          </div>
+          <div class="decision-card-body">
+            <p>Autenticación centralizada con SSO, MFA e integración de identidades entre nube y on-premises. No se resuelve localmente en cada módulo.</p>
+            <span class="decision-tag tag-benefit">Sesión unificada</span>
+            <span class="decision-tag tag-benefit">Gobierno de perfiles</span>
+          </div>
+        </div>
+
+        <!-- Decisión 6 -->
+        <div class="decision-card">
+          <div class="decision-card-header">
+            <div class="decision-number">6</div>
+            <h3>Responsabilidad del Frontend</h3>
+          </div>
+          <div class="decision-card-body">
+            <p>UX, navegación, composición de vistas, validaciones de entrada, consumo de APIs y estado de pantalla. Sin reglas críticas de negocio.</p>
+            <span class="decision-tag tag-justification">Reglas en backend</span>
+            <span class="decision-tag tag-benefit">Menor riesgo funcional</span>
+          </div>
+        </div>
+
+        <!-- Decisión 7 -->
+        <div class="decision-card">
+          <div class="decision-card-header">
+            <div class="decision-number">7</div>
+            <h3>Backend Java 21 — Hexagonal</h3>
+          </div>
+          <div class="decision-card-body">
+            <p>Aislamiento del dominio de negocio respecto a tecnologías concretas: frameworks, persistencia, REST e integraciones externas.</p>
+            <span class="decision-tag tag-benefit">Testabilidad</span>
+            <span class="decision-tag tag-benefit">Mantenibilidad</span>
+            <span class="decision-tag tag-justification">Bajo acoplamiento</span>
+          </div>
+        </div>
+
+        <!-- Decisión 8 -->
+        <div class="decision-card">
+          <div class="decision-card-header">
+            <div class="decision-number">8</div>
+            <h3>Estructura Backend: Puertos y Adaptadores</h3>
+          </div>
+          <div class="decision-card-body">
+            <p>Tres zonas: dominio, aplicación e infraestructura. Puertos y adaptadores para desacoplar exposición, persistencia, seguridad e integración.</p>
+            <span class="decision-tag tag-benefit">Evolución técnica</span>
+            <span class="decision-tag tag-justification">Independencia del dominio</span>
+          </div>
+        </div>
+
+        <!-- Decisión 9 -->
+        <div class="decision-card">
+          <div class="decision-card-header">
+            <div class="decision-number">9</div>
+            <h3>Persistencia: JDBC + JPA ORM</h3>
+          </div>
+          <div class="decision-card-body">
+            <p>Acceso a Oracle mediante JDBC + JPA/Hibernate encapsulado en adaptadores de infraestructura. No ODBC — es el estándar natural para Java empresarial.</p>
+            <span class="decision-tag tag-benefit">Compatibilidad Java</span>
+            <span class="decision-tag tag-justification">Menor complejidad</span>
+          </div>
+        </div>
+
+        <!-- Decisión 10 -->
+        <div class="decision-card">
+          <div class="decision-card-header">
+            <div class="decision-number">10</div>
+            <h3>Integración con Legado Oracle Forms</h3>
+          </div>
+          <div class="decision-card-body">
+            <p>Procedimientos almacenados, PL/SQL, validaciones históricas y estructuras heredadas encapsuladas en adaptadores específicos de infraestructura.</p>
+            <span class="decision-tag tag-benefit">Control de transición</span>
+            <span class="decision-tag tag-justification">Evolución progresiva</span>
+          </div>
+        </div>
+
+        <!-- Decisión 11 -->
+        <div class="decision-card">
+          <div class="decision-card-header">
+            <div class="decision-number">11</div>
+            <h3>Modernización, No Réplica</h3>
+          </div>
+          <div class="decision-card-body">
+            <p>Modernización funcional y arquitectónica. Migrar literalmente solo cambiaría la tecnología sin resolver los problemas estructurales del sistema actual.</p>
+            <span class="decision-tag tag-benefit">Plataforma preparada</span>
+            <span class="decision-tag tag-justification">Resolución estructural</span>
+          </div>
+        </div>
+
+        <!-- Decisión 12 -->
+        <div class="decision-card">
+          <div class="decision-card-header">
+            <div class="decision-number">12</div>
+            <h3>Migración Incremental</h3>
+          </div>
+          <div class="decision-card-body">
+            <p>Migración por capacidades/dominios con convivencia temporal con el legado. Un big bang elevaría el riesgo operativo de un proceso tan crítico como pensiones.</p>
+            <span class="decision-tag tag-benefit">Reducción de riesgo</span>
+            <span class="decision-tag tag-justification">Transición controlada</span>
+          </div>
+        </div>
+
+        <!-- Decisión 13 -->
+        <div class="decision-card">
+          <div class="decision-card-header">
+            <div class="decision-number">13</div>
+            <h3>APIs Orientadas a Casos de Uso</h3>
+          </div>
+          <div class="decision-card-body">
+            <p>El backend expone capacidades por casos de uso del negocio, no como reflejo de tablas o estructuras físicas heredadas de la base de datos.</p>
+            <span class="decision-tag tag-benefit">Alineación con dominio</span>
+            <span class="decision-tag tag-justification">Independencia de persistencia</span>
+          </div>
+        </div>
+
+        <!-- Decisión 14 -->
+        <div class="decision-card">
+          <div class="decision-card-header">
+            <div class="decision-number">14</div>
+            <h3>Estrategia de Pruebas</h3>
+          </div>
+          <div class="decision-card-body">
+            <p>Pruebas unitarias y de integración obligatorias en frontend y backend. Asegurar estabilidad funcional y técnica desde el inicio de la migración.</p>
+            <span class="decision-tag tag-benefit">Calidad</span>
+            <span class="decision-tag tag-benefit">Reducción de defectos</span>
+            <span class="decision-tag tag-justification">Sostenibilidad</span>
+          </div>
+        </div>
+
+        <!-- Decisión 15 -->
+        <div class="decision-card">
+          <div class="decision-card-header">
+            <div class="decision-number">15</div>
+            <h3>Observabilidad, Auditoría y Trazabilidad</h3>
+          </div>
+          <div class="decision-card-body">
+            <p>Trazabilidad de solicitudes, auditoría funcional, manejo centralizado de errores y observabilidad técnica desde el diseño de la plataforma.</p>
+            <span class="decision-tag tag-benefit">Control operativo</span>
+            <span class="decision-tag tag-benefit">Diagnóstico</span>
+            <span class="decision-tag tag-justification">Soporte a producción</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ARQUITECTURA VISUAL -->
+  <section id="arquitectura">
+    <div class="page-wrapper">
+      <div class="section-header">
+        <div class="section-label">
+          <span class="material-symbols-outlined" style="font-size:16px;">layers</span>
+          Vista Arquitectónica
+        </div>
+        <h2 class="section-title">Capas de la Solución</h2>
+        <p class="section-subtitle">Arquitectura por capas con separación clara de responsabilidades.</p>
+      </div>
+
+      <div class="arch-diagram">
+        <div class="arch-layers">
+          <!-- Frontend -->
+          <div class="arch-layer layer-frontend">
+            <div class="arch-layer-title">
+              <span class="material-symbols-outlined">web</span>
+              Frontend — Angular 21 · MVVM
+            </div>
+            <div class="arch-components">
+              <div class="arch-chip"><span class="material-symbols-outlined">palette</span> @seguros-bolivar/ui-bundle</div>
+              <div class="arch-chip"><span class="material-symbols-outlined">view_module</span> Microfrontends (Federation)</div>
+              <div class="arch-chip"><span class="material-symbols-outlined">touch_app</span> UX / Navegación</div>
+              <div class="arch-chip"><span class="material-symbols-outlined">check_circle</span> Validaciones de entrada</div>
+              <div class="arch-chip"><span class="material-symbols-outlined">sync</span> Estado de pantalla</div>
+              <div class="arch-chip"><span class="material-symbols-outlined">api</span> Consumo de APIs</div>
+            </div>
+          </div>
+
+          <div class="arch-arrow"><span class="material-symbols-outlined">arrow_downward</span></div>
+
+          <!-- Seguridad -->
+          <div class="arch-layer" style="background:linear-gradient(135deg,#FEF3C7,#FDE68A);border:1px solid #FCD34D;">
+            <div class="arch-layer-title" style="color:#92400E;">
+              <span class="material-symbols-outlined">shield</span>
+              Seguridad — Oracle Access Manager
+            </div>
+            <div class="arch-components">
+              <div class="arch-chip"><span class="material-symbols-outlined">fingerprint</span> SSO Corporativo</div>
+              <div class="arch-chip"><span class="material-symbols-outlined">lock</span> MFA</div>
+              <div class="arch-chip"><span class="material-symbols-outlined">admin_panel_settings</span> Control de Acceso</div>
+              <div class="arch-chip"><span class="material-symbols-outlined">cloud</span> Nube + On-Premises</div>
+            </div>
+          </div>
+
+          <div class="arch-arrow"><span class="material-symbols-outlined">arrow_downward</span></div>
+
+          <!-- Backend -->
+          <div class="arch-layer layer-backend">
+            <div class="arch-layer-title">
+              <span class="material-symbols-outlined">dns</span>
+              Backend — Java 21 · Arquitectura Hexagonal
+            </div>
+            <div class="arch-components">
+              <div class="arch-chip"><span class="material-symbols-outlined">hub</span> Dominio (Reglas de Negocio)</div>
+              <div class="arch-chip"><span class="material-symbols-outlined">settings</span> Aplicación (Casos de Uso)</div>
+              <div class="arch-chip"><span class="material-symbols-outlined">storage</span> Infraestructura (Adaptadores)</div>
+              <div class="arch-chip"><span class="material-symbols-outlined">api</span> APIs por Casos de Uso</div>
+            </div>
+          </div>
+
+          <div class="arch-arrow"><span class="material-symbols-outlined">arrow_downward</span></div>
+
+          <!-- Infraestructura / Persistencia -->
+          <div class="arch-layer layer-infra">
+            <div class="arch-layer-title">
+              <span class="material-symbols-outlined">database</span>
+              Persistencia — JDBC + JPA ORM
+            </div>
+            <div class="arch-components">
+              <div class="arch-chip"><span class="material-symbols-outlined">table_chart</span> Oracle Database</div>
+              <div class="arch-chip"><span class="material-symbols-outlined">data_object</span> JPA / Hibernate</div>
+              <div class="arch-chip"><span class="material-symbols-outlined">swap_horiz</span> Adaptadores de Infraestructura</div>
+            </div>
+          </div>
+
+          <div class="arch-arrow"><span class="material-symbols-outlined">arrow_downward</span></div>
+
+          <!-- Legado -->
+          <div class="arch-layer layer-legacy">
+            <div class="arch-layer-title">
+              <span class="material-symbols-outlined">history</span>
+              Legado — Oracle Forms (Convivencia Temporal)
+            </div>
+            <div class="arch-components">
+              <div class="arch-chip"><span class="material-symbols-outlined">terminal</span> Procedimientos Almacenados</div>
+              <div class="arch-chip"><span class="material-symbols-outlined">code</span> Paquetes PL/SQL</div>
+              <div class="arch-chip"><span class="material-symbols-outlined">verified_user</span> Validaciones Históricas</div>
+              <div class="arch-chip"><span class="material-symbols-outlined">inventory</span> Estructuras Heredadas</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DOMINIOS MICROFRONTEND -->
+  <section id="dominios" style="background:var(--color-surface);">
+    <div class="page-wrapper">
+      <div class="section-header">
+        <div class="section-label">
+          <span class="material-symbols-outlined" style="font-size:16px;">category</span>
+          Segmentación por Dominios
+        </div>
+        <h2 class="section-title">Dominios Funcionales</h2>
+        <p class="section-subtitle">Cada microfrontend se alinea con una capacidad de negocio, no con pantallas individuales.</p>
+      </div>
+      <div class="domains-grid">
+        <div class="domain-chip"><span class="material-symbols-outlined">search</span> Consulta</div>
+        <div class="domain-chip"><span class="material-symbols-outlined">assignment</span> Trámites</div>
+        <div class="domain-chip"><span class="material-symbols-outlined">folder_open</span> Gestión Documental</div>
+        <div class="domain-chip"><span class="material-symbols-outlined">calculate</span> Liquidación</div>
+        <div class="domain-chip"><span class="material-symbols-outlined">admin_panel_settings</span> Administración</div>
+        <div class="domain-chip"><span class="material-symbols-outlined">tune</span> Parametrización</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ESTRATEGIA DE MIGRACIÓN -->
+  <section id="estrategia">
+    <div class="page-wrapper">
+      <div class="section-header">
+        <div class="section-label">
+          <span class="material-symbols-outlined" style="font-size:16px;">route</span>
+          Estrategia de Migración
+        </div>
+        <h2 class="section-title">Migración Incremental</h2>
+        <p class="section-subtitle">Transición controlada por dominios con convivencia temporal con el legado.</p>
+      </div>
+      <div class="timeline">
+        <div class="timeline-item">
+          <h4>Fase 1 — Fundamentos</h4>
+          <p>Establecer la arquitectura base: proyecto Angular 21 con MVVM, integración del design system @seguros-bolivar/ui-bundle, backend Java 21 con estructura hexagonal y configuración de Oracle Access Manager.</p>
+        </div>
+        <div class="timeline-item">
+          <h4>Fase 2 — Primer Dominio Piloto</h4>
+          <p>Migrar el primer dominio funcional completo (ej. Consulta) como piloto. Validar la arquitectura end-to-end, incluyendo integración con legado Oracle mediante adaptadores.</p>
+        </div>
+        <div class="timeline-item">
+          <h4>Fase 3 — Expansión por Dominios</h4>
+          <p>Migración progresiva de los dominios restantes: Trámites, Gestión Documental, Liquidación, Administración y Parametrización. Cada dominio como microfrontend independiente.</p>
+        </div>
+        <div class="timeline-item">
+          <h4>Fase 4 — Consolidación y Desacople</h4>
+          <p>Reducción progresiva de dependencias con Oracle Forms. Consolidación de APIs por casos de uso, observabilidad completa y estabilización de la plataforma.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- OBSERVABILIDAD -->
+  <section style="background:var(--color-surface);">
+    <div class="page-wrapper">
+      <div class="section-header">
+        <div class="section-label">
+          <span class="material-symbols-outlined" style="font-size:16px;">monitoring</span>
+          Calidad y Operación
+        </div>
+        <h2 class="section-title">Pruebas, Observabilidad y Auditoría</h2>
+      </div>
+      <div class="decisions-grid">
+        <div class="decision-card">
+          <div class="decision-card-header">
+            <div class="decision-number" style="background:var(--color-info);">
+              <span class="material-symbols-outlined" style="font-size:18px;">science</span>
+            </div>
+            <h3>Pruebas Unitarias e Integración</h3>
+          </div>
+          <div class="decision-card-body">
+            <p>Obligatorias en frontend y backend. Angular mantiene guía oficial de testing. Asegurar estabilidad funcional desde el inicio.</p>
+            <span class="decision-tag tag-benefit">Calidad</span>
+            <span class="decision-tag tag-benefit">Sostenibilidad</span>
+          </div>
+        </div>
+        <div class="decision-card">
+          <div class="decision-card-header">
+            <div class="decision-number" style="background:var(--color-warning);">
+              <span class="material-symbols-outlined" style="font-size:18px;">visibility</span>
+            </div>
+            <h3>Observabilidad Técnica</h3>
+          </div>
+          <div class="decision-card-body">
+            <p>Trazabilidad de solicitudes, manejo centralizado de errores y monitoreo transversal de operaciones desde el diseño.</p>
+            <span class="decision-tag tag-benefit">Diagnóstico</span>
+            <span class="decision-tag tag-justification">Soporte producción</span>
+          </div>
+        </div>
+        <div class="decision-card">
+          <div class="decision-card-header">
+            <div class="decision-number" style="background:#6D28D9;">
+              <span class="material-symbols-outlined" style="font-size:18px;">history</span>
+            </div>
+            <h3>Auditoría Funcional</h3>
+          </div>
+          <div class="decision-card-body">
+            <p>Tratándose de un proceso completo de pensiones, la solución debe permitir seguimiento y auditoría transversal de todas las operaciones.</p>
+            <span class="decision-tag tag-benefit">Control operativo</span>
+            <span class="decision-tag tag-justification">Trazabilidad</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONCLUSIÓN -->
+  <section id="conclusion" class="conclusion">
+    <div class="page-wrapper">
+      <h2>Conclusión Ejecutiva</h2>
+      <p>La decisión arquitectónica consiste en modernizar el sistema de pensiones mediante una nueva plataforma empresarial con frontend en <strong>Angular 21</strong> bajo <strong>MVVM</strong>, estandarizada con <strong>@seguros-bolivar/ui-bundle</strong>, con capacidad de evolucionar a <strong>microfrontend por dominios funcionales</strong>, e integrada al esquema corporativo de identidad mediante <strong>Oracle Access Manager</strong>.</p>
+      <p style="margin-top:12px;">En backend, la solución se construirá en <strong>Java 21</strong> con <strong>arquitectura hexagonal</strong>, desacoplando el dominio del negocio de la persistencia y del legado Oracle, y ejecutando una <strong>migración incremental</strong> que reduzca riesgo y preserve continuidad operativa.</p>
+
+      <div class="conclusion-highlights">
+        <div class="conclusion-highlight">
+          <span class="material-symbols-outlined">web</span>
+          <span>Angular 21 + MVVM</span>
+        </div>
+        <div class="conclusion-highlight">
+          <span class="material-symbols-outlined">palette</span>
+          <span>Design System Corporativo</span>
+        </div>
+        <div class="conclusion-highlight">
+          <span class="material-symbols-outlined">view_module</span>
+          <span>Microfrontends por Dominio</span>
+        </div>
+        <div class="conclusion-highlight">
+          <span class="material-symbols-outlined">shield</span>
+          <span>Oracle Access Manager</span>
+        </div>
+        <div class="conclusion-highlight">
+          <span class="material-symbols-outlined">dns</span>
+          <span>Java 21 Hexagonal</span>
+        </div>
+        <div class="conclusion-highlight">
+          <span class="material-symbols-outlined">database</span>
+          <span>JDBC + JPA ORM</span>
+        </div>
+        <div class="conclusion-highlight">
+          <span class="material-symbols-outlined">swap_horiz</span>
+          <span>Adaptadores para Legado</span>
+        </div>
+        <div class="conclusion-highlight">
+          <span class="material-symbols-outlined">trending_up</span>
+          <span>Migración Incremental</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="page-wrapper">
+      <p>Modernización Sistema de Pensiones — Mesa Técnica de Arquitectura © Seguros Bolívar</p>
+    </div>
+  </footer>
+
+</body>
+</html>
