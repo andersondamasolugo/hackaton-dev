@@ -5,28 +5,28 @@
     <div class="form-group">
       <label for="numeroPoliza">Número de Póliza</label>
       <input id="numeroPoliza" type="text" [(ngModel)]="numeroPoliza"
-             placeholder="Ej: RVT-a1b2c3d4" (keyup.enter)="onSearch()" />
+             placeholder="Ej: 10, RVT-DEMO-001" (keyup.enter)="onSearch()" />
     </div>
-    <button class="btn-primary" (click)="onSearch()" [disabled]="isLoading || !numeroPoliza.trim()">
-      {{ isLoading ? 'Buscando...' : 'Buscar' }}
+    <button class="btn-primary" (click)="onSearch()" [disabled]="isLoading() || !numeroPoliza.trim()">
+      {{ isLoading() ? 'Buscando...' : 'Buscar' }}
     </button>
   </div>
 
-  @if (hasSearched && beneficiarios.length > 0) {
-    <div class="table-container">
-      <table class="beneficiarios-table">
+  @if (hasSearched() && beneficiarios().length > 0) {
+    <div class="table-container" style="margin-top: 1.5rem;">
+      <table>
         <thead>
           <tr>
             <th>Nombre</th>
-            <th>Tipo Identificación</th>
-            <th>Número Identificación</th>
+            <th>Tipo ID</th>
+            <th>Número ID</th>
             <th>Parentesco</th>
             <th>Porcentaje</th>
             <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
-          @for (b of beneficiarios; track b.beneficiarioId) {
+          @for (b of beneficiarios(); track b.beneficiarioId) {
             <tr>
               <td>{{ b.nombreCompleto }}</td>
               <td>{{ b.tipoIdentificacion }}</td>
@@ -43,12 +43,12 @@
     </div>
   }
 
-  @if (hasSearched && beneficiarios.length === 0 && !errorMessage) {
+  @if (hasSearched() && beneficiarios().length === 0 && !errorMessage()) {
     <div class="alert alert-warning">No se encontraron beneficiarios para esta póliza</div>
   }
 
-  @if (errorMessage) {
-    <div class="alert alert-error">{{ errorMessage }}</div>
+  @if (errorMessage(); as msg) {
+    <div class="alert alert-error">{{ msg }}</div>
   }
 
   <div class="actions">

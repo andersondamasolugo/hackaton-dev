@@ -1,6 +1,5 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 
@@ -9,74 +8,55 @@ import { BeneficiarioResponse } from '../../../shared/models';
 
 /**
  * Componente de lista de beneficiarios.
- * Permite buscar beneficiarios por número de póliza y muestra
- * una tabla con nombre, identificación, parentesco y porcentaje.
+ * Usa signals para detección de cambios confiable.
  */
 @Component({
   selector: 'app-beneficiarios-lista',
   templateUrl: './beneficiarios-lista.component.html',
   styleUrl: './beneficiarios-lista.component.css',
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule],
 })
 export class BeneficiariosListaComponent {
   private readonly beneficiarioService = inject(BeneficiarioService);
   private readonly router = inject(Router);
 
-  /** Número de póliza ingresado por el usuario. */
   numeroPoliza = '';
+  beneficiarios = signal<BeneficiarioResponse[]>([]);
+  hasSearched = signal(false);
+  isLoading = signal(false);
+  errorMessage = signal('');
 
-  /** Lista de beneficiarios encontrados. */
-  beneficiarios: BeneficiarioResponse[] = [];
-
-  /** Indica si ya se realizó una búsqueda. */
-  hasSearched = false;
-
-  /** Indica si hay una petición en curso. */
-  isLoading = false;
-
-  /** Mensaje de error genérico. */
-  errorMessage = '';
-
-  /** Busca beneficiarios por el número de póliza ingresado. */
   onSearch(): void {
     const trimmed = this.numeroPoliza.trim();
-    if (!trimmed) {
-      return;
-    }
+    if (!trimmed) return;
 
-    this.isLoading = true;
-    this.beneficiarios = [];
-    this.hasSearched = false;
-    this.errorMessage = '';
+    this.isLoading.set(true);
+    this.beneficiarios.set([]);
+    this.hasSearched.set(false);
+    this.errorMessage.set('');
 
     this.beneficiarioService.listarPorPoliza(trimmed).subscribe({
       next: (response) => {
-        this.beneficiarios = response;
-        this.hasSearched = true;
-        this.isLoading = false;
+        this.beneficiarios.set(response);
+        this.hasSearched.set(true);
+        this.isLoading.set(false);
       },
       error: (err: HttpErrorResponse) => {
-        this.isLoading = false;
-        this.hasSearched = true;
+        this.isLoading.set(false);
+        this.hasSearched.set(true);
         if (err.status === 404) {
-          this.beneficiarios = [];
+          this.beneficiarios.set([]);
         } else {
-          this.errorMessage =
-            'Error al consultar beneficiarios. Intente nuevamente.';
+          this.errorMessage.set('Error al consultar beneficiarios. Intente nuevamente.');
         }
       },
     });
   }
 
-  /**
-   * Navega al formulario de edición de un beneficiario.
-   * @param beneficiarioId identificador del beneficiario a editar
-   */
   onEdit(beneficiarioId: number): void {
     this.router.navigate(['/beneficiarios/editar', beneficiarioId]);
   }
 
-  /** Navega de vuelta al menú principal. */
   goToMenu(): void {
     this.router.navigate(['/menu']);
   }

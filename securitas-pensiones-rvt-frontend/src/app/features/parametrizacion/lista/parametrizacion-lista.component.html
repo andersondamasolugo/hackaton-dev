@@ -1,13 +1,13 @@
 <div class="parametrizacion-container">
   <h2>Parametrización del Ramo</h2>
 
-  @if (isLoading) {
+  @if (isLoading()) {
     <p class="loading-text">Cargando parámetros...</p>
   }
 
-  @if (!isLoading && parametros.length > 0) {
+  @if (!isLoading() && parametros().length > 0) {
     <div class="table-container">
-      <table class="parametros-table">
+      <table>
         <thead>
           <tr>
             <th>Código</th>
@@ -19,7 +19,7 @@
           </tr>
         </thead>
         <tbody>
-          @for (p of parametros; track p.parametroId) {
+          @for (p of parametros(); track p.parametroId) {
             <tr>
               <td>{{ p.codigo }}</td>
               <td>{{ p.descripcion }}</td>
@@ -36,12 +36,12 @@
     </div>
   }
 
-  @if (!isLoading && parametros.length === 0 && !errorMessage) {
+  @if (!isLoading() && parametros().length === 0 && !errorMessage()) {
     <div class="alert alert-warning">No se encontraron parámetros configurados</div>
   }
 
-  @if (errorMessage) {
-    <div class="alert alert-error">{{ errorMessage }}</div>
+  @if (errorMessage(); as msg) {
+    <div class="alert alert-error">{{ msg }}</div>
   }
 
   <div class="actions">
