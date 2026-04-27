@@ -1,57 +1,47 @@
 <div class="clientes-container">
   <h2>Búsqueda de Clientes</h2>
 
-  <div class="search-form">
-    <div class="form-row">
-      <div class="form-group">
-        <label for="tipoIdentificacion">Tipo de Identificación</label>
-        <select id="tipoIdentificacion" [(ngModel)]="tipoIdentificacion">
-          <option value="">Todos</option>
-          <option value="CC">Cédula de Ciudadanía</option>
-          <option value="CE">Cédula de Extranjería</option>
-          <option value="NIT">NIT</option>
-          <option value="PA">Pasaporte</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label for="numeroIdentificacion">Número de Identificación</label>
-        <input id="numeroIdentificacion" type="text"
-               [(ngModel)]="numeroIdentificacion"
-               placeholder="Ingrese número" />
-      </div>
-
-      <div class="form-group">
-        <label for="nombre">Nombre</label>
-        <input id="nombre" type="text"
-               [(ngModel)]="nombre"
-               placeholder="Ingrese nombre"
-               (keyup.enter)="onSearch()" />
-      </div>
+  <div class="search-form" style="flex-wrap: wrap;">
+    <div class="form-group">
+      <label for="tipoIdentificacion">Tipo ID</label>
+      <select id="tipoIdentificacion" [(ngModel)]="tipoIdentificacion">
+        <option value="">Todos</option>
+        <option value="CC">CC</option>
+        <option value="CE">CE</option>
+        <option value="NIT">NIT</option>
+        <option value="PA">PA</option>
+      </select>
     </div>
-
-    <button class="btn-primary" (click)="onSearch()" [disabled]="isLoading">
-      {{ isLoading ? 'Buscando...' : 'Buscar' }}
+    <div class="form-group">
+      <label for="numeroIdentificacion">Número ID</label>
+      <input id="numeroIdentificacion" type="text" [(ngModel)]="numeroIdentificacion" placeholder="Número" />
+    </div>
+    <div class="form-group">
+      <label for="nombre">Nombre</label>
+      <input id="nombre" type="text" [(ngModel)]="nombre" placeholder="Nombre" (keyup.enter)="onSearch()" />
+    </div>
+    <button class="btn-primary" (click)="onSearch()" [disabled]="isLoading()">
+      {{ isLoading() ? 'Buscando...' : 'Buscar' }}
     </button>
   </div>
 
-  @if (validationMessage) {
-    <div class="alert alert-warning">{{ validationMessage }}</div>
+  @if (validationMessage(); as msg) {
+    <div class="alert alert-warning">{{ msg }}</div>
   }
 
-  @if (hasSearched && clientes.length > 0) {
-    <div class="table-container">
-      <table class="clientes-table">
+  @if (hasSearched() && clientes().length > 0) {
+    <div class="table-container" style="margin-top: 1rem;">
+      <table>
         <thead>
           <tr>
             <th>Identificación</th>
             <th>Nombre</th>
             <th>Estado</th>
-            <th>N.º Pólizas</th>
+            <th>Pólizas</th>
           </tr>
         </thead>
         <tbody>
-          @for (c of clientes; track c.clienteId) {
+          @for (c of clientes(); track c.clienteId) {
             <tr class="clickable-row" (click)="onSelectCliente(c.clienteId)">
               <td>{{ c.tipoIdentificacion }} {{ c.numeroIdentificacion }}</td>
               <td>{{ c.nombre }}</td>
@@ -64,12 +54,12 @@
     </div>
   }
 
-  @if (hasSearched && clientes.length === 0 && !errorMessage && !validationMessage) {
+  @if (hasSearched() && clientes().length === 0 && !errorMessage() && !validationMessage()) {
     <div class="alert alert-warning">No se encontraron clientes con los criterios ingresados</div>
   }
 
-  @if (errorMessage) {
-    <div class="alert alert-error">{{ errorMessage }}</div>
+  @if (errorMessage(); as msg) {
+    <div class="alert alert-error">{{ msg }}</div>
   }
 
   <div class="actions">

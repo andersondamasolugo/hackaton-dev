@@ -1,69 +1,37 @@
 <div class="detalle-container">
   <h2>Detalle de Cliente</h2>
 
-  @if (isLoading) {
+  @if (isLoading()) {
     <p class="loading-text">Cargando...</p>
   }
 
-  @if (cliente) {
+  @if (cliente(); as c) {
     <div class="info-card">
-      <div class="info-row">
-        <span class="info-label">Nombre</span>
-        <span class="info-value">{{ cliente.nombre }}</span>
-      </div>
-      <div class="info-row">
-        <span class="info-label">Identificación</span>
-        <span class="info-value">{{ cliente.tipoIdentificacion }} {{ cliente.numeroIdentificacion }}</span>
-      </div>
-      <div class="info-row">
-        <span class="info-label">Estado</span>
-        <span class="info-value">{{ cliente.estado }}</span>
-      </div>
-      <div class="info-row">
-        <span class="info-label">Dirección</span>
-        <span class="info-value">{{ cliente.direccion || '—' }}</span>
-      </div>
-      <div class="info-row">
-        <span class="info-label">Teléfono</span>
-        <span class="info-value">{{ cliente.telefono || '—' }}</span>
-      </div>
-      <div class="info-row">
-        <span class="info-label">Email</span>
-        <span class="info-value">{{ cliente.email || '—' }}</span>
-      </div>
+      <div class="info-row"><span class="info-label">Nombre</span><span class="info-value">{{ c.nombre }}</span></div>
+      <div class="info-row"><span class="info-label">Identificación</span><span class="info-value">{{ c.tipoIdentificacion }} {{ c.numeroIdentificacion }}</span></div>
+      <div class="info-row"><span class="info-label">Estado</span><span class="info-value">{{ c.estado }}</span></div>
+      <div class="info-row"><span class="info-label">Dirección</span><span class="info-value">{{ c.direccion || '—' }}</span></div>
+      <div class="info-row"><span class="info-label">Teléfono</span><span class="info-value">{{ c.telefono || '—' }}</span></div>
+      <div class="info-row"><span class="info-label">Email</span><span class="info-value">{{ c.email || '—' }}</span></div>
     </div>
 
-    @if (cliente.polizas && cliente.polizas.length > 0) {
+    @if (c.polizas && c.polizas.length > 0) {
       <h3>Pólizas Asociadas</h3>
       <div class="table-container">
-        <table class="polizas-table">
-          <thead>
-            <tr>
-              <th>Número Póliza</th>
-              <th>Estado</th>
-              <th>Monto Renta</th>
-            </tr>
-          </thead>
+        <table>
+          <thead><tr><th>Número Póliza</th><th>Estado</th><th>Monto</th></tr></thead>
           <tbody>
-            @for (p of cliente.polizas; track p.numeroPoliza) {
-              <tr>
-                <td>{{ p.numeroPoliza }}</td>
-                <td>{{ p.estado }}</td>
-                <td>{{ p.montoRenta | number:'1.2-2' }}</td>
-              </tr>
+            @for (p of c.polizas; track p.numeroPoliza) {
+              <tr><td>{{ p.numeroPoliza }}</td><td>{{ p.estado }}</td><td>{{ p.montoRenta }}</td></tr>
             }
           </tbody>
         </table>
       </div>
     }
-
-    @if (cliente.polizas && cliente.polizas.length === 0) {
-      <div class="alert alert-info">Este cliente no tiene pólizas asociadas</div>
-    }
   }
 
-  @if (errorMessage) {
-    <div class="alert alert-error">{{ errorMessage }}</div>
+  @if (errorMessage(); as msg) {
+    <div class="alert alert-error">{{ msg }}</div>
   }
 
   <div class="actions">
