@@ -4,150 +4,132 @@ import com.segurosbolivar.rvt.domain.model.EstadoPoliza;
 import com.segurosbolivar.rvt.domain.model.Poliza;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Date;
 
 /**
- * Entidad JPA que mapea la tabla POLIZA en la base de datos.
- * Provee métodos estáticos para convertir entre dominio y persistencia.
+ * Entidad JPA que mapea la tabla POLIZA real de Oracle.
+ * Columnas mapeadas a la estructura existente del sistema legado.
  */
 @Entity
 @Table(name = "POLIZA")
 public class JpaPolizaEntity {
 
     @Id
-    @Column(name = "numero_poliza", nullable = false, length = 20)
+    @Column(name = "NUMERO_INTERNO")
+    private Integer numeroInterno;
+
+    @Column(name = "NUMERO_POLIZA", length = 20)
     private String numeroPoliza;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "estado", nullable = false, length = 20)
-    private EstadoPoliza estado;
+    @Column(name = "ESTADO_POLIZA", length = 3)
+    private String estadoPoliza;
 
-    @Column(name = "tipo_identificacion", nullable = false, length = 10)
-    private String tipoIdentificacion;
+    @Column(name = "IDENTIFICACION_AFILIADO")
+    private Long identificacionAfiliado;
 
-    @Column(name = "numero_identificacion", nullable = false, length = 30)
-    private String numeroIdentificacion;
+    @Column(name = "VALOR_PRIMA_UNICA", precision = 18, scale = 2)
+    private BigDecimal valorPrimaUnica;
 
-    @Column(name = "nombre_tomador", nullable = false, length = 200)
-    private String nombreTomador;
+    @Column(name = "VALOR_BASICO_RENTA", precision = 18, scale = 2)
+    private BigDecimal valorBasicoRenta;
 
-    @Column(name = "fecha_inicio_vigencia", nullable = false)
-    private LocalDate fechaInicioVigencia;
+    @Column(name = "VALOR_MESADA", precision = 18, scale = 2)
+    private BigDecimal valorMesada;
 
-    @Column(name = "monto_renta", nullable = false, precision = 18, scale = 2)
-    private BigDecimal montoRenta;
+    @Column(name = "FECHA_EXPEDICION")
+    private Date fechaExpedicion;
 
-    @Column(name = "fecha_creacion", nullable = false)
-    private LocalDateTime fechaCreacion;
+    @Column(name = "FECHA_VIGENCIA")
+    private Date fechaVigencia;
+
+    @Column(name = "MODALIDAD_PENSION", length = 3)
+    private String modalidadPension;
+
+    @Column(name = "CLASE_POLIZA", length = 10)
+    private String clasePoliza;
+
+    @Column(name = "TIPO_RENTA", length = 3)
+    private String tipoRenta;
+
+    @Column(name = "CAUSA_RENTA", length = 3)
+    private String causaRenta;
+
+    @Column(name = "NUMERO_BENEFICIARIOS")
+    private Integer numeroBeneficiarios;
+
+    @Column(name = "OBSERVACIONES", length = 250)
+    private String observaciones;
+
+    @Column(name = "NIT_NEGOCIO")
+    private Long nitNegocio;
+
+    @Column(name = "FECHA_ULT_MODIFICACION")
+    private Date fechaUltModificacion;
+
+    @Column(name = "USUARIO", length = 50)
+    private String usuario;
 
     public JpaPolizaEntity() {
     }
 
     /**
-     * Convierte una entidad de dominio Poliza a entidad JPA.
-     *
-     * @param poliza entidad de dominio
-     * @return entidad JPA lista para persistir
+     * Convierte esta entidad JPA Oracle a entidad de dominio Poliza.
+     * Mapea los campos de Oracle a nuestro modelo simplificado.
+     */
+    public Poliza toDomain() {
+        EstadoPoliza estado = "VIG".equals(this.estadoPoliza) ? EstadoPoliza.ACTIVA : EstadoPoliza.PENDIENTE;
+
+        LocalDate fechaInicio = this.fechaVigencia != null
+                ? new java.sql.Date(this.fechaVigencia.getTime()).toLocalDate()
+                : LocalDate.now();
+
+        LocalDateTime fechaCreacion = this.fechaExpedicion != null
+                ? new java.sql.Timestamp(this.fechaExpedicion.getTime()).toLocalDateTime()
+                : LocalDateTime.now();
+
+        return new Poliza(
+                this.numeroPoliza != null ? this.numeroPoliza : String.valueOf(this.numeroInterno),
+                estado,
+                "CC",
+                this.identificacionAfiliado != null ? String.valueOf(this.identificacionAfiliado) : "0",
+                "Póliza " + this.numeroInterno,
+                fechaInicio,
+                this.valorBasicoRenta != null ? this.valorBasicoRenta : BigDecimal.ZERO,
+                fechaCreacion
+        );
+    }
+
+    /**
+     * Convierte una entidad de dominio a JPA (para inserts — no aplica en Oracle legado).
      */
     public static JpaPolizaEntity fromDomain(Poliza poliza) {
         JpaPolizaEntity entity = new JpaPolizaEntity();
         entity.numeroPoliza = poliza.getNumeroPoliza();
-        entity.estado = poliza.getEstado();
-        entity.tipoIdentificacion = poliza.getTipoIdentificacion();
-        entity.numeroIdentificacion = poliza.getNumeroIdentificacion();
-        entity.nombreTomador = poliza.getNombreTomador();
-        entity.fechaInicioVigencia = poliza.getFechaInicioVigencia();
-        entity.montoRenta = poliza.getMontoRenta();
-        entity.fechaCreacion = poliza.getFechaCreacion();
+        entity.estadoPoliza = poliza.getEstado() == EstadoPoliza.ACTIVA ? "VIG" : "CTZ";
+        entity.valorBasicoRenta = poliza.getMontoRenta();
         return entity;
     }
 
-    /**
-     * Convierte esta entidad JPA a entidad de dominio Poliza.
-     *
-     * @return entidad de dominio con los datos de persistencia
-     */
-    public Poliza toDomain() {
-        return new Poliza(
-                this.numeroPoliza,
-                this.estado,
-                this.tipoIdentificacion,
-                this.numeroIdentificacion,
-                this.nombreTomador,
-                this.fechaInicioVigencia,
-                this.montoRenta,
-                this.fechaCreacion
-        );
-    }
-
-    public String getNumeroPoliza() {
-        return numeroPoliza;
-    }
-
-    public void setNumeroPoliza(String numeroPoliza) {
-        this.numeroPoliza = numeroPoliza;
-    }
-
-    public EstadoPoliza getEstado() {
-        return estado;
-    }
-
-    public void setEstado(EstadoPoliza estado) {
-        this.estado = estado;
-    }
-
-    public String getTipoIdentificacion() {
-        return tipoIdentificacion;
-    }
-
-    public void setTipoIdentificacion(String tipoIdentificacion) {
-        this.tipoIdentificacion = tipoIdentificacion;
-    }
-
-    public String getNumeroIdentificacion() {
-        return numeroIdentificacion;
-    }
-
-    public void setNumeroIdentificacion(String numeroIdentificacion) {
-        this.numeroIdentificacion = numeroIdentificacion;
-    }
-
-    public String getNombreTomador() {
-        return nombreTomador;
-    }
-
-    public void setNombreTomador(String nombreTomador) {
-        this.nombreTomador = nombreTomador;
-    }
-
-    public LocalDate getFechaInicioVigencia() {
-        return fechaInicioVigencia;
-    }
-
-    public void setFechaInicioVigencia(LocalDate fechaInicioVigencia) {
-        this.fechaInicioVigencia = fechaInicioVigencia;
-    }
-
-    public BigDecimal getMontoRenta() {
-        return montoRenta;
-    }
-
-    public void setMontoRenta(BigDecimal montoRenta) {
-        this.montoRenta = montoRenta;
-    }
-
-    public LocalDateTime getFechaCreacion() {
-        return fechaCreacion;
-    }
-
-    public void setFechaCreacion(LocalDateTime fechaCreacion) {
-        this.fechaCreacion = fechaCreacion;
-    }
+    // Getters
+    public Integer getNumeroInterno() { return numeroInterno; }
+    public String getNumeroPoliza() { return numeroPoliza; }
+    public String getEstadoPoliza() { return estadoPoliza; }
+    public Long getIdentificacionAfiliado() { return identificacionAfiliado; }
+    public BigDecimal getValorPrimaUnica() { return valorPrimaUnica; }
+    public BigDecimal getValorBasicoRenta() { return valorBasicoRenta; }
+    public BigDecimal getValorMesada() { return valorMesada; }
+    public Date getFechaExpedicion() { return fechaExpedicion; }
+    public Date getFechaVigencia() { return fechaVigencia; }
+    public String getModalidadPension() { return modalidadPension; }
+    public String getClasePoliza() { return clasePoliza; }
+    public String getTipoRenta() { return tipoRenta; }
+    public String getCausaRenta() { return causaRenta; }
+    public Integer getNumeroBeneficiarios() { return numeroBeneficiarios; }
+    public String getObservaciones() { return observaciones; }
 }

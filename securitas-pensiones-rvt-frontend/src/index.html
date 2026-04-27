@@ -10,5 +10,14 @@
 </head>
 <body>
   <app-root></app-root>
+
+  <!-- n8n Chat Widget -->
+  <link href="https://cdn.jsdelivr.net/npm/@n8n/chat/dist/style.css" rel="stylesheet" />
+  <script type="module">
+    import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js';
+    createChat({
+      webhookUrl: 'http://localhost:5678/webhook/0f4c9122-0b30-4ee5-9e0a-b6d6ee6f6a5d/chat'
+    });
+  </script>
 </body>
 </html>

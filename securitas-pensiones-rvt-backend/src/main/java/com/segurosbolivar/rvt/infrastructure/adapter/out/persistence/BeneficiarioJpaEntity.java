@@ -3,135 +3,121 @@ package com.segurosbolivar.rvt.infrastructure.adapter.out.persistence;
 import com.segurosbolivar.rvt.domain.model.Beneficiario;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
 import jakarta.persistence.Table;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.Objects;
 
 /**
- * Entidad JPA que mapea la tabla BENEFICIARIO en la base de datos.
- * Provee métodos estáticos para convertir entre dominio y persistencia.
+ * Entidad JPA que mapea la tabla BENEFICIARIO real de Oracle.
+ * PK compuesta: NIT_NEGOCIO + NUMERO_INTERNO + SECUENCIA_BENEFICIARIO.
  */
 @Entity
 @Table(name = "BENEFICIARIO")
+@IdClass(BeneficiarioJpaEntity.BeneficiarioId.class)
 public class BeneficiarioJpaEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "beneficiario_id")
-    private Long id;
+    @Column(name = "NIT_NEGOCIO")
+    private Long nitNegocio;
 
-    @Column(name = "numero_poliza", nullable = false, length = 20)
-    private String numeroPoliza;
+    @Id
+    @Column(name = "NUMERO_INTERNO")
+    private Integer numeroInterno;
 
-    @Column(name = "nombre_completo", nullable = false, length = 200)
-    private String nombreCompleto;
+    @Id
+    @Column(name = "SECUENCIA_BENEFICIARIO")
+    private Integer secuenciaBeneficiario;
 
-    @Column(name = "tipo_identificacion", nullable = false, length = 10)
-    private String tipoIdentificacion;
+    @Column(name = "TIPO_DOCUMENTO", length = 10)
+    private String tipoDocumento;
 
-    @Column(name = "numero_identificacion", nullable = false, length = 30)
-    private String numeroIdentificacion;
+    @Column(name = "IDENTIFICACION_BENEFICIARIO")
+    private Long identificacionBeneficiario;
 
-    @Column(name = "parentesco", nullable = false, length = 50)
+    @Column(name = "NOMBRE_COMUN", length = 50)
+    private String nombreComun;
+
+    @Column(name = "PARENTESCO", length = 3)
     private String parentesco;
 
-    @Column(name = "porcentaje_participacion", nullable = false, precision = 5, scale = 2)
-    private BigDecimal porcentajeParticipacion;
+    @Column(name = "PORCENTAJE_BENEFICIARIO", precision = 16, scale = 4)
+    private BigDecimal porcentajeBeneficiario;
+
+    @Column(name = "ESTADO_BENEFICIARIO", length = 10)
+    private String estadoBeneficiario;
+
+    @Column(name = "SENAL_ACTIVO", length = 1)
+    private String senalActivo;
+
+    @Column(name = "SEXO", length = 1)
+    private String sexo;
 
     public BeneficiarioJpaEntity() {
     }
 
     /**
-     * Convierte una entidad de dominio Beneficiario a entidad JPA.
-     *
-     * @param beneficiario entidad de dominio
-     * @return entidad JPA lista para persistir
-     */
-    public static BeneficiarioJpaEntity fromDomain(Beneficiario beneficiario) {
-        BeneficiarioJpaEntity entity = new BeneficiarioJpaEntity();
-        entity.id = beneficiario.getId();
-        entity.numeroPoliza = beneficiario.getNumeroPoliza();
-        entity.nombreCompleto = beneficiario.getNombreCompleto();
-        entity.tipoIdentificacion = beneficiario.getTipoIdentificacion();
-        entity.numeroIdentificacion = beneficiario.getNumeroIdentificacion();
-        entity.parentesco = beneficiario.getParentesco();
-        entity.porcentajeParticipacion = beneficiario.getPorcentajeParticipacion();
-        return entity;
-    }
-
-    /**
-     * Convierte esta entidad JPA a entidad de dominio Beneficiario.
-     *
-     * @return entidad de dominio con los datos de persistencia
+     * Convierte esta entidad JPA Oracle a entidad de dominio.
      */
     public Beneficiario toDomain() {
         return new Beneficiario(
-                this.id,
-                this.numeroPoliza,
-                this.nombreCompleto,
-                this.tipoIdentificacion,
-                this.numeroIdentificacion,
-                this.parentesco,
-                this.porcentajeParticipacion
+                this.secuenciaBeneficiario != null ? this.secuenciaBeneficiario.longValue() : 0L,
+                String.valueOf(this.numeroInterno),
+                this.nombreComun != null ? this.nombreComun : "Sin nombre",
+                this.tipoDocumento != null ? this.tipoDocumento : "CC",
+                this.identificacionBeneficiario != null ? String.valueOf(this.identificacionBeneficiario) : "0",
+                this.parentesco != null ? this.parentesco : "N/A",
+                this.porcentajeBeneficiario != null ? this.porcentajeBeneficiario : BigDecimal.ZERO
         );
     }
 
-    public Long getId() {
-        return id;
+    public static BeneficiarioJpaEntity fromDomain(Beneficiario beneficiario) {
+        BeneficiarioJpaEntity entity = new BeneficiarioJpaEntity();
+        entity.nombreComun = beneficiario.getNombreCompleto();
+        entity.tipoDocumento = beneficiario.getTipoIdentificacion();
+        entity.parentesco = beneficiario.getParentesco();
+        entity.porcentajeBeneficiario = beneficiario.getPorcentajeParticipacion();
+        return entity;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    // Getters
+    public Long getNitNegocio() { return nitNegocio; }
+    public Integer getNumeroInterno() { return numeroInterno; }
+    public Integer getSecuenciaBeneficiario() { return secuenciaBeneficiario; }
+    public String getTipoDocumento() { return tipoDocumento; }
+    public Long getIdentificacionBeneficiario() { return identificacionBeneficiario; }
+    public String getNombreComun() { return nombreComun; }
+    public String getParentesco() { return parentesco; }
+    public BigDecimal getPorcentajeBeneficiario() { return porcentajeBeneficiario; }
+    public String getEstadoBeneficiario() { return estadoBeneficiario; }
+    public String getSenalActivo() { return senalActivo; }
 
-    public String getNumeroPoliza() {
-        return numeroPoliza;
-    }
+    /**
+     * Clase PK compuesta para la tabla BENEFICIARIO.
+     */
+    public static class BeneficiarioId implements Serializable {
+        private Long nitNegocio;
+        private Integer numeroInterno;
+        private Integer secuenciaBeneficiario;
 
-    public void setNumeroPoliza(String numeroPoliza) {
-        this.numeroPoliza = numeroPoliza;
-    }
+        public BeneficiarioId() {}
 
-    public String getNombreCompleto() {
-        return nombreCompleto;
-    }
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            BeneficiarioId that = (BeneficiarioId) o;
+            return Objects.equals(nitNegocio, that.nitNegocio)
+                    && Objects.equals(numeroInterno, that.numeroInterno)
+                    && Objects.equals(secuenciaBeneficiario, that.secuenciaBeneficiario);
+        }
 
-    public void setNombreCompleto(String nombreCompleto) {
-        this.nombreCompleto = nombreCompleto;
-    }
-
-    public String getTipoIdentificacion() {
-        return tipoIdentificacion;
-    }
-
-    public void setTipoIdentificacion(String tipoIdentificacion) {
-        this.tipoIdentificacion = tipoIdentificacion;
-    }
-
-    public String getNumeroIdentificacion() {
-        return numeroIdentificacion;
-    }
-
-    public void setNumeroIdentificacion(String numeroIdentificacion) {
-        this.numeroIdentificacion = numeroIdentificacion;
-    }
-
-    public String getParentesco() {
-        return parentesco;
-    }
-
-    public void setParentesco(String parentesco) {
-        this.parentesco = parentesco;
-    }
-
-    public BigDecimal getPorcentajeParticipacion() {
-        return porcentajeParticipacion;
-    }
-
-    public void setPorcentajeParticipacion(BigDecimal porcentajeParticipacion) {
-        this.porcentajeParticipacion = porcentajeParticipacion;
+        @Override
+        public int hashCode() {
+            return Objects.hash(nitNegocio, numeroInterno, secuenciaBeneficiario);
+        }
     }
 }

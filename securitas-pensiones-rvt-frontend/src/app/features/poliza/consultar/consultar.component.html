@@ -3,66 +3,74 @@
 
   <div class="search-form">
     <div class="form-group">
-      <label for="numeroPoliza">Número de Póliza</label>
+      <label for="numeroPoliza">Número de Póliza o Número Interno</label>
       <input id="numeroPoliza" type="text" [(ngModel)]="numeroPoliza"
-             placeholder="Ej: RVT-a1b2c3d4" (keyup.enter)="onSearch()" />
+             placeholder="Ej: 10, 10370" (keyup.enter)="onSearch()" />
     </div>
-    <button class="btn-primary" (click)="onSearch()" [disabled]="isLoading || !numeroPoliza.trim()">
-      {{ isLoading ? 'Buscando...' : 'Buscar' }}
+    <button class="btn-primary" (click)="onSearch()" [disabled]="isLoading() || !numeroPoliza.trim()">
+      {{ isLoading() ? 'Buscando...' : 'Buscar' }}
     </button>
   </div>
 
-  @if (poliza) {
-    <div class="poliza-detail">
-      <h3>Datos de la Póliza</h3>
-      <div class="detail-grid">
-        <div class="detail-item">
-          <span class="label">Número</span>
-          <span class="value">{{ poliza.numeroPoliza }}</span>
-        </div>
-        <div class="detail-item">
-          <span class="label">Estado</span>
-          <span class="value">
-            <span class="badge" [class.badge-pendiente]="poliza.estado === 'PENDIENTE'"
-                  [class.badge-activa]="poliza.estado === 'ACTIVA'">
-              {{ poliza.estado }}
-            </span>
-          </span>
-        </div>
-        <div class="detail-item">
-          <span class="label">Tipo Identificación</span>
-          <span class="value">{{ poliza.tipoIdentificacion }}</span>
-        </div>
-        <div class="detail-item">
-          <span class="label">Número Identificación</span>
-          <span class="value">{{ poliza.numeroIdentificacion }}</span>
-        </div>
-        <div class="detail-item">
-          <span class="label">Nombre Tomador</span>
-          <span class="value">{{ poliza.nombreTomador }}</span>
-        </div>
-        <div class="detail-item">
-          <span class="label">Fecha Inicio Vigencia</span>
-          <span class="value">{{ poliza.fechaInicioVigencia }}</span>
-        </div>
-        <div class="detail-item">
-          <span class="label">Monto Renta</span>
-          <span class="value">{{ poliza.montoRenta | number:'1.2-2' }}</span>
-        </div>
-        <div class="detail-item">
-          <span class="label">Fecha Creación</span>
-          <span class="value">{{ poliza.fechaCreacion }}</span>
-        </div>
-      </div>
+  @if (poliza(); as p) {
+    <div class="table-container" style="margin-top: 1.5rem;">
+      <table>
+        <thead>
+          <tr>
+            <th colspan="2" style="text-align: center; font-size: 1.1rem;">
+              📋 Datos de la Póliza
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="font-weight: 600; color: var(--sb-primary); width: 40%;">Número Póliza</td>
+            <td>{{ p.numeroPoliza }}</td>
+          </tr>
+          <tr>
+            <td style="font-weight: 600; color: var(--sb-primary);">Estado</td>
+            <td>
+              <span class="badge" [class.badge-pendiente]="p.estado === 'PENDIENTE'"
+                    [class.badge-activa]="p.estado === 'ACTIVA'">
+                {{ p.estado }}
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <td style="font-weight: 600; color: var(--sb-primary);">Tipo Identificación</td>
+            <td>{{ p.tipoIdentificacion }}</td>
+          </tr>
+          <tr>
+            <td style="font-weight: 600; color: var(--sb-primary);">Número Identificación</td>
+            <td>{{ p.numeroIdentificacion }}</td>
+          </tr>
+          <tr>
+            <td style="font-weight: 600; color: var(--sb-primary);">Nombre Tomador</td>
+            <td>{{ p.nombreTomador }}</td>
+          </tr>
+          <tr>
+            <td style="font-weight: 600; color: var(--sb-primary);">Fecha Inicio Vigencia</td>
+            <td>{{ p.fechaInicioVigencia }}</td>
+          </tr>
+          <tr>
+            <td style="font-weight: 600; color: var(--sb-primary);">Monto Renta</td>
+            <td>$ {{ p.montoRenta }}</td>
+          </tr>
+          <tr>
+            <td style="font-weight: 600; color: var(--sb-primary);">Fecha Creación</td>
+            <td>{{ p.fechaCreacion }}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   }
 
-  @if (notFoundMessage) {
-    <div class="alert alert-warning">{{ notFoundMessage }}</div>
+  @if (notFoundMessage(); as msg) {
+    <div class="alert alert-warning">{{ msg }}</div>
   }
 
-  @if (errorMessage) {
-    <div class="alert alert-error">{{ errorMessage }}</div>
+  @if (errorMessage(); as msg) {
+    <div class="alert alert-error">{{ msg }}</div>
   }
 
   <div class="actions">

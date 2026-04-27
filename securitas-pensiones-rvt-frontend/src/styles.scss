@@ -7,32 +7,33 @@
    1. CSS Custom Properties (Corporate Color Palette)
    -------------------------------------------------------------------------- */
 :root {
-  /* Primary */
-  --sb-primary: #1a237e;
-  --sb-primary-light: #534bae;
-  --sb-primary-dark: #000051;
-  --sb-primary-rgb: 26, 35, 126;
+  /* Primary — Verde Seguros Bolívar (del UI Bundle real) */
+  --sb-primary: #009056;
+  --sb-primary-light: #66bc9a;
+  --sb-primary-dark: #0b613e;
+  --sb-primary-rgb: 0, 144, 86;
 
-  /* Accent */
-  --sb-accent: #0d47a1;
+  /* Secondary — Amarillo/Dorado Seguros Bolívar */
+  --sb-accent: #ffe16f;
+  --sb-accent-dark: #ffc918;
 
   /* Semantic */
-  --sb-success: #2e7d32;
-  --sb-success-light: #e8f5e9;
-  --sb-success-border: #a5d6a7;
+  --sb-success: #28a745;
+  --sb-success-light: #e9f6ec;
+  --sb-success-border: #94d3a2;
 
-  --sb-error: #c62828;
-  --sb-error-light: #ffebee;
-  --sb-error-border: #ef9a9a;
+  --sb-error: #dc3545;
+  --sb-error-light: #fbebec;
+  --sb-error-border: #ee9aa2;
 
-  --sb-warning: #f57f17;
-  --sb-warning-dark: #e65100;
-  --sb-warning-light: #fff3e0;
+  --sb-warning: #ffc100;
+  --sb-warning-dark: #d7b23e;
+  --sb-warning-light: #fff9e5;
   --sb-warning-border: #ffcc80;
 
-  --sb-info: #1565c0;
-  --sb-info-light: #e3f2fd;
-  --sb-info-border: #90caf9;
+  --sb-info: #007eff;
+  --sb-info-light: #e5f2ff;
+  --sb-info-border: #80bfff;
 
   /* Surfaces */
   --sb-background: #f5f5f5;
@@ -77,7 +78,7 @@ html {
 body {
   margin: 0;
   padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI',
     'Helvetica Neue', Arial, sans-serif;
   font-size: 1rem;
   line-height: 1.5;
@@ -196,7 +197,7 @@ a:hover {
 }
 
 .btn-primary:hover:not(:disabled) {
-  background-color: #283593;
+  background-color: #086d44;
 }
 
 .btn-primary:disabled {
@@ -222,7 +223,7 @@ a:hover {
 }
 
 .btn-secondary:hover {
-  background-color: #e8eaf6;
+  background-color: #e5f4ee;
 }
 
 .btn-success {
@@ -308,7 +309,7 @@ table {
 }
 
 table thead {
-  background-color: #e8eaf6;
+  background-color: #e5f4ee;
 }
 
 table th {
@@ -344,7 +345,7 @@ table tbody tr:nth-child(even):hover {
 }
 
 .clickable-row:hover {
-  background-color: #e8eaf6 !important;
+  background-color: #e5f4ee !important;
 }
 
 /* --------------------------------------------------------------------------

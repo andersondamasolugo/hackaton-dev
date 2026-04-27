@@ -8,8 +8,8 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 /**
- * Implementación JPA del repositorio de pólizas.
- * Convierte entre entidades de dominio y entidades JPA.
+ * Implementación JPA del repositorio de pólizas contra Oracle.
+ * Busca por NUMERO_POLIZA o NUMERO_INTERNO (flexible para el demo).
  * Activa solo con el profile "real" para conexión a Oracle.
  */
 @Repository
@@ -22,12 +22,6 @@ public class JpaPolizaRepository implements PolizaRepository {
         this.jpaRepository = jpaRepository;
     }
 
-    /**
-     * Persiste una póliza convirtiendo de dominio a JPA entity.
-     *
-     * @param poliza entidad de dominio a persistir
-     * @return póliza persistida convertida de vuelta a dominio
-     */
     @Override
     public Poliza save(Poliza poliza) {
         JpaPolizaEntity entity = JpaPolizaEntity.fromDomain(poliza);
@@ -36,14 +30,24 @@ public class JpaPolizaRepository implements PolizaRepository {
     }
 
     /**
-     * Busca una póliza por su número convirtiendo de JPA entity a dominio.
-     *
-     * @param numeroPoliza número de la póliza
-     * @return póliza encontrada o vacío si no existe
+     * Busca una póliza por número. Intenta primero por NUMERO_POLIZA (texto),
+     * luego por NUMERO_INTERNO (numérico) si el valor es un número.
      */
     @Override
     public Optional<Poliza> findByNumeroPoliza(String numeroPoliza) {
-        return jpaRepository.findByNumeroPoliza(numeroPoliza)
-                .map(JpaPolizaEntity::toDomain);
+        // Primero intenta por NUMERO_POLIZA (texto)
+        Optional<JpaPolizaEntity> result = jpaRepository.findByNumeroPoliza(numeroPoliza);
+
+        // Si no encuentra y el valor es numérico, intenta por NUMERO_INTERNO
+        if (result.isEmpty()) {
+            try {
+                int numeroInterno = Integer.parseInt(numeroPoliza);
+                result = jpaRepository.findByNumeroInterno(numeroInterno);
+            } catch (NumberFormatException ignored) {
+                // No es numérico, no buscar por NUMERO_INTERNO
+            }
+        }
+
+        return result.map(JpaPolizaEntity::toDomain);
     }
 }

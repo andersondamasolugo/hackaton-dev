@@ -1,17 +1,17 @@
 package com.segurosbolivar.rvt.infrastructure.adapter.out.persistence;
 
-import com.segurosbolivar.rvt.domain.model.Beneficiario;
-import com.segurosbolivar.rvt.domain.port.out.BeneficiarioRepository;
-import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Repository;
-
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Repository;
+
+import com.segurosbolivar.rvt.domain.model.Beneficiario;
+import com.segurosbolivar.rvt.domain.port.out.BeneficiarioRepository;
+
 /**
- * Implementación JPA del repositorio de beneficiarios.
- * Convierte entre entidades de dominio y entidades JPA.
- * Activa solo con el profile "real" para conexión a Oracle.
+ * Implementación JPA del repositorio de beneficiarios contra Oracle.
+ * Busca por NUMERO_INTERNO (el parámetro "numeroPoliza" se interpreta como número interno).
  */
 @Repository
 @Profile("real")
@@ -23,41 +23,30 @@ public class JpaBeneficiarioAdapter implements BeneficiarioRepository {
         this.jpaRepository = jpaRepository;
     }
 
-    /**
-     * Busca todos los beneficiarios asociados a una póliza.
-     *
-     * @param numeroPoliza número de la póliza
-     * @return lista de beneficiarios de dominio
-     */
     @Override
     public List<Beneficiario> findByNumeroPoliza(String numeroPoliza) {
-        return jpaRepository.findByNumeroPoliza(numeroPoliza).stream()
-                .map(BeneficiarioJpaEntity::toDomain)
-                .toList();
+        try {
+            int numeroInterno = Integer.parseInt(numeroPoliza);
+            return jpaRepository.findByNumeroInternoAndSenalActivo(numeroInterno, "S").stream()
+                    .map(BeneficiarioJpaEntity::toDomain)
+                    .toList();
+        } catch (NumberFormatException e) {
+            return List.of();
+        }
     }
 
-    /**
-     * Busca un beneficiario por su identificador.
-     *
-     * @param id identificador del beneficiario
-     * @return beneficiario encontrado o vacío si no existe
-     */
     @Override
     public Optional<Beneficiario> findById(Long id) {
-        return jpaRepository.findById(id)
+        // En Oracle, el ID es la secuencia_beneficiario — búsqueda simplificada
+        return jpaRepository.findAll().stream()
+                .filter(e -> e.getSecuenciaBeneficiario() != null && e.getSecuenciaBeneficiario().longValue() == id)
+                .findFirst()
                 .map(BeneficiarioJpaEntity::toDomain);
     }
 
-    /**
-     * Persiste un beneficiario convirtiendo de dominio a JPA entity.
-     *
-     * @param beneficiario entidad de dominio a persistir
-     * @return beneficiario persistido convertido de vuelta a dominio
-     */
     @Override
     public Beneficiario save(Beneficiario beneficiario) {
-        BeneficiarioJpaEntity entity = BeneficiarioJpaEntity.fromDomain(beneficiario);
-        BeneficiarioJpaEntity saved = jpaRepository.save(entity);
-        return saved.toDomain();
+        // Read-only para Oracle legado en el demo
+        return beneficiario;
     }
 }
